@@ -1,52 +1,14 @@
-<!-- Improved compatibility of back to top link: See: https://github.com/othneildrew/Best-README-Template/pull/73 -->
 <a name="readme-top"></a>
-<!--
-*** Thanks for checking out the Best-README-Template. If you have a suggestion
-*** that would make this better, please fork the repo and create a pull request
-*** or simply open an issue with the tag "enhancement".
-*** Don't forget to give the project a star!
-*** Thanks again! Now go create something AMAZING! :D
--->
-
-
-
-<!-- PROJECT SHIELDS -->
-<!--
-*** I'm using markdown "reference style" links for readability.
-*** Reference links are enclosed in brackets [ ] instead of parentheses ( ).
-*** See the bottom of this document for the declaration of the reference variables
-*** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
-*** https://www.markdownguide.org/basic-syntax/#reference-style-links
--->
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-[![MIT License][license-shield]][license-url]
-[![LinkedIn][linkedin-shield]][linkedin-url]
-
-
 
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/othneildrew/Best-README-Template">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
-  </a>
-
-  <h3 align="center">Best-README-Template</h3>
+  <img src="https://avatars.githubusercontent.com/u/164241643?s=200&v=4" title="Logo" alt="Logo" width="80" height="80">
+  <h3 align="center">Model Manager v0.1</h3>
 
   <p align="center">
-    An awesome README template to jumpstart your projects!
+    Deploy open source AI models to AWS in minutes!
     <br />
-    <a href="https://github.com/othneildrew/Best-README-Template"><strong>Explore the docs »</strong></a>
-    <br />
-    <br />
-    <a href="https://github.com/othneildrew/Best-README-Template">View Demo</a>
-    ·
-    <a href="https://github.com/othneildrew/Best-README-Template/issues">Report Bug</a>
-    ·
-    <a href="https://github.com/othneildrew/Best-README-Template/issues">Request Feature</a>
   </p>
 </div>
 
@@ -57,10 +19,7 @@
   <summary>Table of Contents</summary>
   <ol>
     <li>
-      <a href="#about-the-project">About The Project</a>
-      <ul>
-        <li><a href="#built-with">Built With</a></li>
-      </ul>
+      <a href="#about-model-manager">About Model Manager</a>
     </li>
     <li>
       <a href="#getting-started">Getting Started</a>
@@ -69,63 +28,45 @@
         <li><a href="#installation">Installation</a></li>
       </ul>
     </li>
-    <li><a href="#usage">Usage</a></li>
-    <li><a href="#roadmap">Roadmap</a></li>
-    <li><a href="#contributing">Contributing</a></li>
+    <li><a href="#using-model-manager">Using Model Manager</a></li>
+    <li><a href="#what-were-working-on-next">What we're working on next</a></li>
+    <li><a href="#known-issues">Known issues</a></li>
     <li><a href="#license">License</a></li>
+    <li><a href="#contributing">Contributing</a></li>
     <li><a href="#contact">Contact</a></li>
-    <li><a href="#acknowledgments">Acknowledgments</a></li>
   </ol>
 </details>
 
 
 
 <!-- ABOUT THE PROJECT -->
-## About The Project
+## About Model Manager
+Model Manager is a Python tool that simplifies the process of deploying an open source AI model to your own cloud. Instead of spending hours digging through documentation to figure out how to get AWS working, Model Manager lets you deploy open source AI models directly from the command line.
 
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
+Choose a model from Hugging Face or SageMaker, and Model Manager will spins up an EC2 instance with a ready-to-query endpoint in minutes.
 
-There are many great README templates available on GitHub; however, I didn't find one that really suited my needs so I created this enhanced one. I want to create a README template so amazing that it'll be the last one you ever need -- I think this is it.
+*[demo video of model manager running Phi2]*
 
-Here's why:
-* Your time should be focused on creating something amazing. A project that solves a problem and helps others
-* You shouldn't be doing the same tasks over and over like creating a README from scratch
-* You should implement DRY principles to the rest of your life :smile:
+Here we’re deploying Microsoft’s Phi2. Larger models such as this take about 10 minutes to spin up.
 
-Of course, no one template will serve all projects since your needs may be different. So I'll be adding more in the near future. You may also suggest changes by forking this repo and creating a pull request or opening an issue. Thanks to all the people have contributed to expanding this template!
-
-Use the `BLANK_README.md` to get started.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
-### Built With
-
-This section should list any major frameworks/libraries used to bootstrap your project. Leave any add-ons/plugins for the acknowledgements section. Here are a few examples.
-
-* [![Next][Next.js]][Next-url]
-* [![React][React.js]][React-url]
-* [![Vue][Vue.js]][Vue-url]
-* [![Angular][Angular.io]][Angular-url]
-* [![Svelte][Svelte.dev]][Svelte-url]
-* [![Laravel][Laravel.com]][Laravel-url]
-* [![Bootstrap][Bootstrap.com]][Bootstrap-url]
-* [![JQuery][JQuery.com]][JQuery-url]
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 
 
 <!-- GETTING STARTED -->
 ## Getting Started
 
-This is an example of how you may give instructions on setting up your project locally.
+Model Manager works with AWS. Azure and GCP support are coming soon!
 To get a local copy up and running follow these simple example steps.
 
 ### Prerequisites
 
 This is an example of how to list things you need to use the software and how to install them.
+* Python
+* An AWS account
+* Quota for AWS SageMaker instances (by default, you get 1 instance of ml.m5.xlarge for free)
+* Certain Hugging Face models (e.g. Llama2) require an access token ([hf docs](https://huggingface.co/docs/hub/en/models-gated#access-gated-models-as-a-user))
+
 * npm
   ```sh
   npm install npm@latest -g
@@ -133,67 +74,134 @@ This is an example of how to list things you need to use the software and how to
 
 ### Installation
 
-_Below is an example of how you can instruct your audience on installing and setting up your app. This template doesn't rely on any external dependencies or services._
+**Step 1: Set up AWS and SageMaker**
 
-1. Get a free API Key at [https://example.com](https://example.com)
-2. Clone the repo
-   ```sh
-   git clone https://github.com/your_username_/Project-Name.git
-   ```
-3. Install NPM packages
-   ```sh
-   npm install
-   ```
-4. Enter your API in `config.js`
-   ```js
-   const API_KEY = 'ENTER YOUR API';
-   ```
+To get started, you’ll need an AWS account which you can create at https://aws.amazon.com/. Then you’ll need to create access keys for SageMaker.
+
+We put together a step-by-step Google Doc for how to do this here, and we also created a walkthrough video to show you how to get set up in 2 minutes.
+
+
+**Step 2: Set up Model Manager**
+
+You should now have your Access Key and Secret from SageMaker. Now you can set up Model Manager! Clone the repo to your local machine, and then run the setup script:
+
+```sh
+   bash setup.sh
+```
+
+This will configure the AWS client so you’re ready to start deploying models. You’ll be prompted to enter your Access Key and Secret here. You can also specify your AWS region. The default is us-east-1. You only need to change this if your SageMaker instance quota is in a different region.
+
+Optional: If you have a Hugging Face Hub Token, you can add it to `.env` that was generated by the setup script and add it with the key:
+
+```sh
+HUGGING_FACE_HUB_KEY="KeyValueHere"
+```
+
+This will allow you to use models with access restrictions such as Llama2 as long as your Hugging Face account has permission to do so.
+
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 
-<!-- USAGE EXAMPLES -->
-## Usage
+<!-- USAGE -->
+## Using Model Manager
+After you’ve set up AWS and Model Manager per the above, run Model Manager using python or python3:
+```sh
+python3 model_manager.py
+```
 
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
+*[add screenshot of terminal showing home screen here]*
 
-_For more examples, please refer to the [Documentation](https://example.com)_
+Now you’re ready to start shipping models onto your cloud!
+<br>
+<br>
+
+### Deploying models
+
+There are two repositories from where you can deploy models: Hugging Face or SageMaker. Use whichever works for you! Note that you’ll need larger, more expensive instance types in order to run bigger models. It takes anywhere from 2 minutes (for smaller models) to 10+ minutes (for large models) to spin up the instance with your model.
+<br>
+<br>
+
+If you’re using the ml.m5.xlarge instance type, here are some small Hugging Face models that work great:
+<br>
+<br>
+
+**Model: [google-bert/bert-base-uncased](https://huggingface.co/google-bert/bert-base-uncased)**
+
+- **Type:** Fill Mask: tries to complete your sentence like Madlibs
+- **Query format:** text string with `[MASK]` somewhere in it that you wish for the transformer to fill
+    
+    *[example screenshot of query/response from terminal]*
+<br>
+<br>
+
+**Model: [sentence-transformers/all-MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2)**
+
+- **Type:** Feature extraction; turns text into a 384d vector embedding for semantic search / clustering
+- **Query format:** "*type out a sentence like this one.*"
+    
+    *[example screenshot of query/response from terminal]*
+<br>
+<br>
+
+**Model: [deepset/roberta-base-squad2](https://huggingface.co/deepset/roberta-base-squad2)**
+
+- **Type:** Question answering; provide a question and some context from which the transformer will answer the question.
+- **Query format:** A dict with two keys: `question` and `context`. For our tool, we will prompt you a second time to provide the context.
+
+*[example screenshot of query/response from terminal]*\
+<br>
+<br>
+
+### Querying models
+There are two ways to query a model you’ve deployed: you can query it using the Model Manager script, or you can call it directly from your code using SageMaker’s API.
+
+Querying within Model Manager currently works for text-based models. Image generation, multi-modal, etc. models are not yet supported.
+
+You can query all deployed models using the SageMaker API. Documentation for how to do this can be found [here](https://docs.aws.amazon.com/sagemaker/latest/APIReference/API_runtime_InvokeEndpoint.html).
+
+### Deactivating models
+
+Any model endpoints you spin up will run continuously unless you deactivate them! Make sure to delete endpoints you’re no longer using so you don’t keep getting charged for your SageMaker instance.
+
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 
 <!-- ROADMAP -->
-## Roadmap
-
-- [x] Add Changelog
-- [x] Add back to top links
-- [ ] Add Additional Templates w/ Examples
-- [ ] Add "components" document to easily copy & paste sections of the readme
-- [ ] Multi-language Support
-    - [ ] Chinese
-    - [ ] Spanish
-
-See the [open issues](https://github.com/othneildrew/Best-README-Template/issues) for a full list of proposed features (and known issues).
+## What we're working on next
+- [ ]  More robust error handling for various edge cases
+- [ ]  Verbose logging
+- [ ]  Support for deploying custom models
+- [ ]  Single-line-of-code SageMaker onboarding
+- [ ]  Enabling / disabling autoscaling
+- [ ]  Deployment to Azure and GCP
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+
+<!-- ISSUES -->
+## Known issues
+- [ ]  Querying within Model Manager currently only works with text-based model - doesn’t work with multimodal, image generation, etc.
+- [ ]  Long HF model names (longer than 50 characters) and names with special characters other  than `-` breaks.
+- [ ]  Model versions are static.
+- [ ]  Querying endpoints with different expected formats
+- [ ]  Deleting a model is not instant, it may show up briefly after it was queued for deletion
+- [ ]  Deploying the same model within the same minute will break
+
+See [open issues](https://github.com/UnidataHQ/model_manager/issues) for a full list of known issues and proposed features.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 <!-- CONTRIBUTING -->
 ## Contributing
 
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
 If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
-Don't forget to give the project a star! Thanks again!
 
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+If you found this useful, please give us a star! Thanks again!
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -211,60 +219,6 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 <!-- CONTACT -->
 ## Contact
 
-Your Name - [@your_twitter](https://twitter.com/your_username) - email@example.com
+You can reach us, Arthur & Tyler, at [hello@openfoundry.ai](mailto:hello@openfoundry.ai). 
 
-Project Link: [https://github.com/your_username/repo_name](https://github.com/your_username/repo_name)
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
-<!-- ACKNOWLEDGMENTS -->
-## Acknowledgments
-
-Use this space to list resources you find helpful and would like to give credit to. I've included a few of my favorites to kick things off!
-
-* [Choose an Open Source License](https://choosealicense.com)
-* [GitHub Emoji Cheat Sheet](https://www.webpagefx.com/tools/emoji-cheat-sheet)
-* [Malven's Flexbox Cheatsheet](https://flexbox.malven.co/)
-* [Malven's Grid Cheatsheet](https://grid.malven.co/)
-* [Img Shields](https://shields.io)
-* [GitHub Pages](https://pages.github.com)
-* [Font Awesome](https://fontawesome.com)
-* [React Icons](https://react-icons.github.io/react-icons/search)
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
-<!-- MARKDOWN LINKS & IMAGES -->
-<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/othneildrew/Best-README-Template.svg?style=for-the-badge
-[contributors-url]: https://github.com/othneildrew/Best-README-Template/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/othneildrew/Best-README-Template.svg?style=for-the-badge
-[forks-url]: https://github.com/othneildrew/Best-README-Template/network/members
-[stars-shield]: https://img.shields.io/github/stars/othneildrew/Best-README-Template.svg?style=for-the-badge
-[stars-url]: https://github.com/othneildrew/Best-README-Template/stargazers
-[issues-shield]: https://img.shields.io/github/issues/othneildrew/Best-README-Template.svg?style=for-the-badge
-[issues-url]: https://github.com/othneildrew/Best-README-Template/issues
-[license-shield]: https://img.shields.io/github/license/othneildrew/Best-README-Template.svg?style=for-the-badge
-[license-url]: https://github.com/othneildrew/Best-README-Template/blob/master/LICENSE.txt
-[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://linkedin.com/in/othneildrew
-[product-screenshot]: images/screenshot.png
-[Next.js]: https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white
-[Next-url]: https://nextjs.org/
-[React.js]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
-[React-url]: https://reactjs.org/
-[Vue.js]: https://img.shields.io/badge/Vue.js-35495E?style=for-the-badge&logo=vuedotjs&logoColor=4FC08D
-[Vue-url]: https://vuejs.org/
-[Angular.io]: https://img.shields.io/badge/Angular-DD0031?style=for-the-badge&logo=angular&logoColor=white
-[Angular-url]: https://angular.io/
-[Svelte.dev]: https://img.shields.io/badge/Svelte-4A4A55?style=for-the-badge&logo=svelte&logoColor=FF3E00
-[Svelte-url]: https://svelte.dev/
-[Laravel.com]: https://img.shields.io/badge/Laravel-FF2D20?style=for-the-badge&logo=laravel&logoColor=white
-[Laravel-url]: https://laravel.com
-[Bootstrap.com]: https://img.shields.io/badge/Bootstrap-563D7C?style=for-the-badge&logo=bootstrap&logoColor=white
-[Bootstrap-url]: https://getbootstrap.com
-[JQuery.com]: https://img.shields.io/badge/jQuery-0769AD?style=for-the-badge&logo=jquery&logoColor=white
-[JQuery-url]: https://jquery.com 
+We’d love to hear from you! We’re excited to learn how we can make this more valuable for the community and welcome any and all feedback and suggestions.
