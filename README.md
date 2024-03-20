@@ -31,8 +31,8 @@
     <li><a href="#using-model-manager">Using Model Manager</a></li>
     <li><a href="#what-were-working-on-next">What we're working on next</a></li>
     <li><a href="#known-issues">Known issues</a></li>
-    <li><a href="#license">License</a></li>
     <li><a href="#contributing">Contributing</a></li>
+    <li><a href="#license">License</a></li>
     <li><a href="#contact">Contact</a></li>
   </ol>
 </details>
@@ -43,7 +43,7 @@
 ## About Model Manager
 Model Manager is a Python tool that simplifies the process of deploying an open source AI model to your own cloud. Instead of spending hours digging through documentation to figure out how to get AWS working, Model Manager lets you deploy open source AI models directly from the command line.
 
-Choose a model from Hugging Face or SageMaker, and Model Manager will spins up an EC2 instance with a ready-to-query endpoint in minutes.
+Choose a model from Hugging Face or SageMaker, and Model Manager will spin up a SageMaker instance with a ready-to-query endpoint in minutes.
 
 *[demo video of model manager running Phi2]*
 
