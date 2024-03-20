@@ -1,6 +1,6 @@
 import boto3
 import json
-import inquirer
+from InquirerPy import prompt
 from rich.console import Console
 from sagemaker.huggingface.model import HuggingFacePredictor
 from src.sagemaker_helpers import SagemakerTask, HuggingFaceTask
@@ -24,12 +24,9 @@ def query_hugging_face_endpoint(session, endpoint_name: str, query: str):
 
     input = {"inputs": query}
     if task is not None and task == HuggingFaceTask.QuestionAnswering:
-        questions = [
-            inquirer.Text('context',
-                          message="What context would you like to provide?",
-                          )
-        ]
-        answers = inquirer.prompt(questions)
+        questions = [{
+            "type": "input", "message": "What context would you like to provide?:", "name": "context"}]
+        answers = prompt(questions)
         if answers is None:
             print_error("must provide context for question-answering")
             return

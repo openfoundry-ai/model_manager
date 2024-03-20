@@ -16,6 +16,7 @@ huggingface-hub==0.21.4
 idna==3.6
 importlib-metadata==6.11.0
 inquirer==3.2.4
+inquirerpy==0.3.4
 jmespath==1.0.1
 jsonschema==4.21.1
 jsonschema-specifications==2023.12.1
@@ -26,9 +27,11 @@ numpy==1.26.4
 packaging==24.0
 pandas==2.2.1
 pathos==0.3.2
+pfzy==0.3.4
 platformdirs==4.2.0
 pox==0.3.4
 ppft==1.7.6.8
+prompt-toolkit==3.0.43
 protobuf==4.25.3
 psutil==5.9.8
 Pygments==2.17.2
@@ -51,6 +54,7 @@ tblib==3.0.0
 tqdm==4.66.2
 typing_extensions==4.10.0
 tzdata==2024.1
+urllib3==2.2.1
 wcwidth==0.2.13
 xmod==1.8.1
 zipp==3.18.1
