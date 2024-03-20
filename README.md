@@ -67,10 +67,6 @@ This is an example of how to list things you need to use the software and how to
 * Quota for AWS SageMaker instances (by default, you get 1 instance of ml.m5.xlarge for free)
 * Certain Hugging Face models (e.g. Llama2) require an access token ([hf docs](https://huggingface.co/docs/hub/en/models-gated#access-gated-models-as-a-user))
 
-* npm
-  ```sh
-  npm install npm@latest -g
-  ```
 
 ### Installation
 
