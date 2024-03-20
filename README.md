@@ -45,7 +45,7 @@ Model Manager is a Python tool that simplifies the process of deploying an open 
 
 Choose a model from Hugging Face or SageMaker, and Model Manager will spin up a SageMaker instance with a ready-to-query endpoint in minutes.
 
-*[demo video of model manager running Phi2]*
+*[screenshot of model manager running Phi2]*
 
 Here we’re deploying Microsoft’s Phi2. Larger models such as this take about 10 minutes to spin up.
 
