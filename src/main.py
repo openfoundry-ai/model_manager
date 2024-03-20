@@ -36,6 +36,9 @@ def main(args, loglevel):
         instance_count = 1
         predictor = deploy_huggingface_model(
             args.hf, instance_type, instance_count)
+
+    print("[magenta]Model Manager by OpenFoundry.")
+    print("[magenta]Star us on Github ☆! [blue]https://github.com/openfoundry-ai/model_manager")
     while True:
         active_endpoints = list_sagemaker_endpoints()
 
