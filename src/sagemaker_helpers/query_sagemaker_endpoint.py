@@ -1,5 +1,6 @@
 import boto3
 import json
+import inquirer
 from InquirerPy import prompt
 from rich.console import Console
 from sagemaker.huggingface.model import HuggingFacePredictor
@@ -33,6 +34,13 @@ def query_hugging_face_endpoint(session, endpoint_name: str, query: str):
         input = {}
         input['context'] = answers['context']
         input['question'] = query
+    if task is not None and task == HuggingFaceTask.TextGeneration:
+        input['parameters'] = {
+            "max_new_tokens": 250,
+            "top_p": 0.9,
+            "temperature": 0.9,
+            "return_full_text": True,
+        }
 
     try:
         result = predictor.predict(input)
