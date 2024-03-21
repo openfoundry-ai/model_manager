@@ -3,12 +3,7 @@ import inquirer
 from typing import List
 from rich import print
 from enum import StrEnum
-
-
-class EC2Instance(StrEnum):
-    SMALL = "ml.m5.xlarge"
-    MEDIUM = "ml.p3.2xlarge"
-    LARGE = "ml.g5.12xlarge"
+from . import EC2Instance
 
 
 def list_sagemaker_endpoints(filter_str: str = None) -> List[str]:
