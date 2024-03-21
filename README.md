@@ -74,9 +74,11 @@ This is an example of how to list things you need to use the software and how to
 
 To get started, you’ll need an AWS account which you can create at https://aws.amazon.com/. Then you’ll need to create access keys for SageMaker.
 
-We put together a step-by-step Google Doc for how to do this here, and we also created a walkthrough video to show you how to get set up in 2 minutes.
+We made a walkthrough video to show you how to get set up with your SageMaker access keys in 2 minutes.
 
 https://github.com/openfoundry-ai/model_manager/assets/164248540/52b0dcee-87cd-48de-9251-b2d3571abf61
+
+If you prefer a written doc, we wrote up the steps in [Google Doc](https://docs.google.com/document/d/1kLzPU43kvLAoYzmBfvAkINmXZ24JzAp_fdBIYjJRXvU/edit?usp=sharing) as well. 
 
 
 **Step 2: Set up Model Manager**
