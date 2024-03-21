@@ -4,8 +4,9 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <img src="https://avatars.githubusercontent.com/u/164241643?s=200&v=4" title="Logo" alt="Logo" width="80" height="80">
-  <h3 align="center">Model Manager v0.1</h3>
+  <h3 align="center">Model Manager v0.1, by</h3>
+
+  ![Color logo - no background](https://github.com/openfoundry-ai/model_manager/assets/152243036/75d1b0d1-1ca3-4260-afd1-4130b0c3db32)
 
   <p align="center">
     Deploy open source AI models to AWS in minutes.
