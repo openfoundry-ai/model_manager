@@ -71,7 +71,7 @@ To get a local copy up and running follow these simple example steps.
 This is an example of how to list things you need to use the software and how to install them.
 * Python
 * An AWS account
-* Quota for AWS SageMaker instances (by default, you get 1 instance of ml.m5.xlarge for free)
+* Quota for AWS SageMaker instances (by default, you get 2 instances of ml.m5.xlarge for free)
 * Certain Hugging Face models (e.g. Llama2) require an access token ([hf docs](https://huggingface.co/docs/hub/en/models-gated#access-gated-models-as-a-user))
 
 
@@ -90,7 +90,7 @@ If you prefer a written doc, we wrote up the steps in [Google Doc](https://docs.
 
 **Step 2: Set up Model Manager**
 
-You should now have your Access Key and Secret from SageMaker. Now you can set up Model Manager! Clone the repo to your local machine, and then run the setup script:
+You should now have your Access Key and Secret from SageMaker. Now you can set up Model Manager! Clone the repo to your local machine, and then run the setup script in the repo:
 
 ```sh
    bash setup.sh
