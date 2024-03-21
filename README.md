@@ -64,11 +64,10 @@ Once the model is running, you can query it to get a response.
 ## Getting Started
 
 Model Manager works with AWS. Azure and GCP support are coming soon!
-To get a local copy up and running follow these simple example steps.
+To get a local copy up and running follow these simple steps.
 
 ### Prerequisites
 
-This is an example of how to list things you need to use the software and how to install them.
 * Python
 * An AWS account
 * Quota for AWS SageMaker instances (by default, you get 2 instances of ml.m5.xlarge for free)
