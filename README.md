@@ -49,6 +49,7 @@ https://github.com/openfoundry-ai/model_manager/assets/164248540/f7fbf9ce-04c3-4
 
 <br>
 Once the model is running, you can query it to get a response.
+
 ![Screenshot 2024-03-20 at 6 01 44 PM](https://github.com/openfoundry-ai/model_manager/assets/164248540/20b46f8f-da01-4cc7-8343-e647b27ba7c6)
 
 
