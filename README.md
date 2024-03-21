@@ -1,3 +1,4 @@
+
 <a name="readme-top"></a>
 
 <!-- PROJECT LOGO -->
@@ -57,6 +58,8 @@ Once the model is running, you can query it to get a response.
 
 
 <!-- GETTING STARTED -->
+<br>
+
 ## Getting Started
 
 Model Manager works with AWS. Azure and GCP support are coming soon!
@@ -108,6 +111,8 @@ This will allow you to use models with access restrictions such as Llama2 as lon
 
 
 <!-- USAGE -->
+<br>
+
 ## Using Model Manager
 After you’ve set up AWS and Model Manager per the above, run Model Manager using python or python3:
 ```sh
@@ -178,6 +183,8 @@ Any model endpoints you spin up will run continuously unless you deactivate them
 
 
 <!-- ROADMAP -->
+<br>
+
 ## What we're working on next
 - [ ]  More robust error handling for various edge cases
 - [ ]  Verbose logging
@@ -190,6 +197,8 @@ Any model endpoints you spin up will run continuously unless you deactivate them
 
 
 <!-- ISSUES -->
+<br>
+
 ## Known issues
 - [ ]  Querying within Model Manager currently only works with text-based model - doesn’t work with multimodal, image generation, etc.
 - [ ]  Long HF model names (longer than 50 characters) and names with special characters other  than `-` breaks.
@@ -204,6 +213,8 @@ See [open issues](https://github.com/UnidataHQ/model_manager/issues) for a full 
 
 
 <!-- CONTRIBUTING -->
+<br>
+
 ## Contributing
 
 If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
@@ -215,6 +226,8 @@ If you found this useful, please give us a star! Thanks again!
 
 
 <!-- LICENSE -->
+<br>
+
 ## License
 
 Distributed under the MIT License. See `LICENSE.txt` for more information.
@@ -224,6 +237,8 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 
 
 <!-- CONTACT -->
+<br>
+
 ## Contact
 
 You can reach us, Arthur & Tyler, at [hello@openfoundry.ai](mailto:hello@openfoundry.ai). 
