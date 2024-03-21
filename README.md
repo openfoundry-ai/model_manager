@@ -128,7 +128,7 @@ Now you’re ready to start shipping models onto your cloud!
 
 ### Deploying models
 
-There are two repositories from where you can deploy models: Hugging Face or SageMaker. Use whichever works for you! If you're deploying with Hugging Face, copy/paste the full model name from Hugging Face. For example, "google-bert/bert-base-uncased" without quotes. Note that you’ll need larger, more expensive instance types in order to run bigger models. It takes anywhere from 2 minutes (for smaller models) to 10+ minutes (for large models) to spin up the instance with your model.
+There are two repositories from where you can deploy models: Hugging Face or SageMaker. Use whichever works for you! If you're deploying with Hugging Face, copy/paste the full model name from Hugging Face. For example, `google-bert/bert-base-uncased`. Note that you’ll need larger, more expensive instance types in order to run bigger models. It takes anywhere from 2 minutes (for smaller models) to 10+ minutes (for large models) to spin up the instance with your model.
 <br>
 <br>
 
