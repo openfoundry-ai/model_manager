@@ -8,7 +8,7 @@
   <h3 align="center">Model Manager v0.1</h3>
 
   <p align="center">
-    Deploy open source AI models to AWS in minutes!
+    Deploy open source AI models to AWS in minutes.
     <br />
   </p>
 </div>
