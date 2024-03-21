@@ -1,6 +1,7 @@
 #!/bin/sh
 python3 -m ensurepip --upgrade
 make
+source venv/bin/activate
 if ! command -v aws &> /dev/null
 then
     curl "https://awscli.amazonaws.com/AWSCLIV2.pkg" -o "AWSCLIV2.pkg"
