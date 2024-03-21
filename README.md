@@ -37,17 +37,17 @@
   </ol>
 </details>
 
-
-
 <!-- ABOUT THE PROJECT -->
 ## About Model Manager
 Model Manager is a Python tool that simplifies the process of deploying an open source AI model to your own cloud. Instead of spending hours digging through documentation to figure out how to get AWS working, Model Manager lets you deploy open source AI models directly from the command line.
 
 Choose a model from Hugging Face or SageMaker, and Model Manager will spin up a SageMaker instance with a ready-to-query endpoint in minutes.
 
-*[screenshot of model manager running Phi2]*
-
 Here we’re deploying Microsoft’s Phi2. Larger models such as this take about 10 minutes to spin up.
+
+https://github.com/openfoundry-ai/model_manager/assets/164248540/f7fbf9ce-04c3-49b0-b5be-2977b5cc90af
+
+![Screenshot 2024-03-20 at 6 01 44 PM](https://github.com/openfoundry-ai/model_manager/assets/164248540/20b46f8f-da01-4cc7-8343-e647b27ba7c6)
 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -75,6 +75,8 @@ This is an example of how to list things you need to use the software and how to
 To get started, you’ll need an AWS account which you can create at https://aws.amazon.com/. Then you’ll need to create access keys for SageMaker.
 
 We put together a step-by-step Google Doc for how to do this here, and we also created a walkthrough video to show you how to get set up in 2 minutes.
+
+https://github.com/openfoundry-ai/model_manager/assets/164248540/52b0dcee-87cd-48de-9251-b2d3571abf61
 
 
 **Step 2: Set up Model Manager**
@@ -107,7 +109,8 @@ After you’ve set up AWS and Model Manager per the above, run Model Manager usi
 python3 model_manager.py
 ```
 
-*[add screenshot of terminal showing home screen here]*
+![home screen](https://github.com/openfoundry-ai/model_manager/assets/164248540/22ede5aa-99e3-4191-bca8-3021c6b572e7)
+
 
 Now you’re ready to start shipping models onto your cloud!
 <br>
@@ -128,16 +131,18 @@ If you’re using the ml.m5.xlarge instance type, here are some small Hugging Fa
 - **Type:** Fill Mask: tries to complete your sentence like Madlibs
 - **Query format:** text string with `[MASK]` somewhere in it that you wish for the transformer to fill
     
-    *[example screenshot of query/response from terminal]*
+    ![fill mask bert query](https://github.com/openfoundry-ai/model_manager/assets/164248540/a8a6d8e9-183f-4c85-afe8-b9c21d8aa687)
+
 <br>
 <br>
 
 **Model: [sentence-transformers/all-MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2)**
 
-- **Type:** Feature extraction; turns text into a 384d vector embedding for semantic search / clustering
+- **Type:** Feature extraction: turns text into a 384d vector embedding for semantic search / clustering
 - **Query format:** "*type out a sentence like this one.*"
     
-    *[example screenshot of query/response from terminal]*
+    ![sentence transformer query](https://github.com/openfoundry-ai/model_manager/assets/164248540/57b4da43-03bb-4642-892b-5f287dfce0d8)
+
 <br>
 <br>
 
@@ -146,7 +151,8 @@ If you’re using the ml.m5.xlarge instance type, here are some small Hugging Fa
 - **Type:** Question answering; provide a question and some context from which the transformer will answer the question.
 - **Query format:** A dict with two keys: `question` and `context`. For our tool, we will prompt you a second time to provide the context.
 
-*[example screenshot of query/response from terminal]*\
+    ![roberta eqa query](https://github.com/openfoundry-ai/model_manager/assets/164248540/2054fdb7-1f3d-4bfe-a806-c5ebde8ad20d)
+
 <br>
 <br>
 
