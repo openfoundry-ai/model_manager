@@ -2,6 +2,7 @@ import argparse
 import logging
 import os
 from pathlib import Path
+from src.sagemaker_helpers.create_sagemaker_model import deploy_huggingface_model
 
 if __name__ == '__main__':
     # Run setup if these files/directories don't already exist
@@ -18,6 +19,11 @@ if __name__ == '__main__':
         type=str
     )
     parser.add_argument(
+        "--instance",
+        help="EC2 instance type to deploy to.",
+        type=str
+    )
+    parser.add_argument(
         "-v",
         "--verbose",
         help="increase output verbosity",
@@ -29,6 +35,10 @@ if __name__ == '__main__':
         loglevel = logging.DEBUG
     else:
         loglevel = logging.INFO
+
+    if args.hf is not None:
+        instance_type = args.instance or "ml.m5.xlarge"
+        predictor = deploy_huggingface_model(args.hf, instance_type)
 
     from src.main import main
     main(args, loglevel)

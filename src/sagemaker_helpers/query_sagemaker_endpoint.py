@@ -2,11 +2,12 @@ import boto3
 import json
 import inquirer
 from InquirerPy import prompt
-from rich.console import Console
 from sagemaker.huggingface.model import HuggingFacePredictor
+from src.console import console
 from src.sagemaker_helpers import SagemakerTask, HuggingFaceTask
 from src.utils.model_utils import get_hugging_face_pipeline_task, get_model_name_from_hugging_face_endpoint, get_sagemaker_framework_and_task
 from src.utils.rich_utils import print_error
+from src.session import sagemaker_session
 
 
 def parse_response(query_response):
@@ -16,12 +17,11 @@ def parse_response(query_response):
     return probabilities, labels, predicted_label
 
 
-def query_hugging_face_endpoint(session, endpoint_name: str, query: str):
-    console = Console()
+def query_hugging_face_endpoint(endpoint_name: str, query: str):
     model_name = get_model_name_from_hugging_face_endpoint(endpoint_name)
     task = get_hugging_face_pipeline_task(model_name)
     predictor = HuggingFacePredictor(endpoint_name=endpoint_name,
-                                     sagemaker_session=session)
+                                     sagemaker_session=sagemaker_session)
 
     input = {"inputs": query}
     if task is not None and task == HuggingFaceTask.QuestionAnswering:
@@ -53,7 +53,6 @@ def query_hugging_face_endpoint(session, endpoint_name: str, query: str):
 
 
 def query_sagemaker_endpoint(endpoint_name: str, query: str):
-    console = Console()
     client = boto3.client('runtime.sagemaker')
     newline, bold, unbold = '\n', '\033[1m', '\033[0m'
 

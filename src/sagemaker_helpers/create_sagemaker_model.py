@@ -3,28 +3,26 @@ import datetime
 import json
 from dotenv import dotenv_values
 from huggingface_hub import HfApi
-from rich import print
-from rich.console import Console
+from huggingface_hub import login
 from rich.table import Table
 from sagemaker import image_uris, model_uris, script_uris
-from sagemaker.huggingface.model import HuggingFaceModel
 from sagemaker.huggingface import get_huggingface_llm_image_uri
+from sagemaker.huggingface.model import HuggingFaceModel
 from sagemaker.jumpstart.model import JumpStartModel
 from sagemaker.model import Model
 from sagemaker.predictor import Predictor
-from sagemaker.session import Session
-from src.utils.rich_utils import print_error
-from huggingface_hub import login
+from src.session import session, sagemaker_session
+from src.console import console
+from src.utils.rich_utils import print_error, print_success
 from . import HuggingFaceTask, EC2Instance
 
 SAGEMAKER_ROLE = dotenv_values(".env")["SAGEMAKER_ROLE"]
 HUGGING_FACE_HUB_TOKEN = dotenv_values(".env").get("HUGGING_FACE_HUB_KEY")
 
 
-def deploy_huggingface_model(model_id, instance_type: str, instance_count: int):
-    console = Console()
+def deploy_huggingface_model(model_id, instance_type: str, instance_count: int = 1):
     hf_api = HfApi()
-    region_name = boto3.session.Session().region_name
+    region_name = session.region_name
     try:
         model_info = hf_api.model_info(model_id, token=HUGGING_FACE_HUB_TOKEN)
         task = model_info.pipeline_tag
@@ -91,13 +89,13 @@ def deploy_huggingface_model(model_id, instance_type: str, instance_count: int):
         except Exception:
             console.print_exception()
             quit()
+
+    print_success(
+        f"{model_id} is now up and running at the endpoint [blue]{predictor.endpoint_name}")
     return predictor
 
 
-def create_sagemaker_model(model_id: str, model_version: str, instance_type, instance_count, console, is_train: bool = False):
-    session = boto3.session.Session()
-    sagemaker_session = Session(boto_session=session)
-
+def create_sagemaker_model(model_id: str, model_version: str, instance_type, instance_count, is_train: bool = False):
     scope = "training" if is_train else "inference"
     entry_point = "train.py" if is_train else "inference.py"
 
@@ -146,9 +144,8 @@ def create_sagemaker_model(model_id: str, model_version: str, instance_type, ins
     return model
 
 
-def create_and_deploy_jumpstart_model(model_id: str, model_version: str, instance_type: str, instance_count: int):
-    console = Console()
-    region_name = boto3.session.Session().region_name
+def create_and_deploy_jumpstart_model(model_id: str, model_version: str, instance_type: str, instance_count: int = 1):
+    region_name = session.region_name
     dt_string = datetime.datetime.now().strftime("%Y%m%d%H%M")
     # Endpoint name must be < 63 characters
     model_string = model_id[:50]
@@ -176,4 +173,6 @@ def create_and_deploy_jumpstart_model(model_id: str, model_version: str, instanc
             console.print_exception()
             quit()
 
+    print_success(
+        f"{model_id} is now up and running at the endpoint [blue]{predictor.endpoint_name}")
     return predictor

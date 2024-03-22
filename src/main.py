@@ -1,13 +1,12 @@
 import inquirer
 import logging
+import threading
 logging.getLogger("sagemaker.config").setLevel(logging.WARNING)
 logging.getLogger("botocore.credentials").setLevel(logging.WARNING)
-import sagemaker
-import boto3
 from InquirerPy import prompt
 from .sagemaker_helpers.create_sagemaker_model import create_and_deploy_jumpstart_model, deploy_huggingface_model
 from .sagemaker_helpers.delete_sagemaker_model import delete_sagemaker_model
-from .sagemaker_helpers.sagemaker_resources import list_sagemaker_endpoints, select_instance
+from .sagemaker_helpers.sagemaker_resources import list_sagemaker_endpoints, select_instance, list_service_quotas_async
 from .sagemaker_helpers.query_sagemaker_endpoint import query_sagemaker_endpoint, query_hugging_face_endpoint
 from .sagemaker_helpers.search_sagemaker_jumpstart_models import search_sagemaker_jumpstart_model
 from .utils.model_utils import is_sagemaker_model
@@ -28,18 +27,15 @@ class Actions(StrEnum):
 
 def main(args, loglevel):
     logging.basicConfig(format="%(levelname)s: %(message)s", level=loglevel)
-    session = boto3.session.Session()
-    sagemaker_session = sagemaker.session.Session(boto_session=session)
-
-    if args.hf is not None:
-        # TODO: take args
-        instance_type = select_instance()
-        instance_count = 1
-        predictor = deploy_huggingface_model(
-            args.hf, instance_type, instance_count)
 
     print("[magenta]Model Manager by OpenFoundry.")
     print("[magenta]Star us on Github ☆! [blue]https://github.com/openfoundry-ai/model_manager")
+
+    # list_service_quotas is a pretty slow API and it's paginated. Use async here and store the result in instances
+    instances = []
+    thr = threading.Thread(target=list_service_quotas_async, args=[instances])
+    thr.start()
+
     while True:
         active_endpoints = list_sagemaker_endpoints()
 
@@ -83,16 +79,12 @@ def main(args, loglevel):
                     continue
 
                 model_id, model_version = answers['model_id'], "2.*"
-
-                # TODO: take args
-                instance_type = select_instance()
-                instance_count = 1
+                thr.join()
+                instance_type = select_instance(instances)
                 predictor = create_and_deploy_jumpstart_model(
-                    model_id, model_version, instance_type, instance_count)
+                    model_id, model_version, instance_type)
                 if predictor is None:
                     continue
-                print_success(
-                    f"{model_id} is now up and running at the endpoint [blue]{predictor.endpoint_name}")
             case Actions.HUGGING_FACE:
                 questions = [
                     inquirer.Text(
@@ -105,18 +97,13 @@ def main(args, loglevel):
                     continue
 
                 model_id = answers['model_id']
-
-                # TODO: take args
-                instance_type = select_instance()
-                instance_count = 1
-                predictor = deploy_huggingface_model(
-                    model_id, instance_type, instance_count)
+                thr.join()
+                instance_type = select_instance(instances)
+                predictor = deploy_huggingface_model(model_id, instance_type)
 
                 if predictor is None:
                     continue
 
-                print_success(
-                    f"{model_id} is now up and running at the endpoint [blue]{predictor.endpoint_name} and is ready to be queried!")
             case Actions.DELETE:
                 if (len(active_endpoints) == 0):
                     print_success("No Endpoints to delete!")
@@ -162,8 +149,7 @@ def main(args, loglevel):
                 if is_sagemaker_model(endpoint):
                     query_sagemaker_endpoint(endpoint, query)
                 else:
-                    query_hugging_face_endpoint(
-                        sagemaker_session, endpoint, query)
+                    query_hugging_face_endpoint(endpoint, query)
             case Actions.EXIT:
                 quit()
 
