@@ -24,5 +24,6 @@ EOF
 
 # Creates the role
 echo "SAGEMAKER_ROLE=`aws iam create-role --role-name ${ROLE_NAME} --assume-role-policy-document file:///tmp/assume-role-policy-document.json | grep -Eo '"arn:aws:iam.*?[^\\]"'`" >> .env  
-# attaches the S3 full access policy to the role
+
+# attaches the Sagemaker full access policy to the role
 aws iam attach-role-policy --policy-arn ${POLICY}  --role-name ${ROLE_NAME}
