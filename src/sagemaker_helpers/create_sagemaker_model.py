@@ -1,5 +1,6 @@
 import boto3
 import datetime
+import json
 from dotenv import dotenv_values
 from huggingface_hub import HfApi
 from rich import print
@@ -7,12 +8,14 @@ from rich.console import Console
 from rich.table import Table
 from sagemaker import image_uris, model_uris, script_uris
 from sagemaker.huggingface.model import HuggingFaceModel
+from sagemaker.huggingface import get_huggingface_llm_image_uri
 from sagemaker.jumpstart.model import JumpStartModel
 from sagemaker.model import Model
 from sagemaker.predictor import Predictor
 from sagemaker.session import Session
 from src.utils.rich_utils import print_error
 from huggingface_hub import login
+from . import HuggingFaceTask, EC2Instance
 
 SAGEMAKER_ROLE = dotenv_values(".env")["SAGEMAKER_ROLE"]
 HUGGING_FACE_HUB_TOKEN = dotenv_values(".env").get("HUGGING_FACE_HUB_KEY")
@@ -40,12 +43,22 @@ def deploy_huggingface_model(model_id, instance_type: str, instance_count: int):
     if HUGGING_FACE_HUB_TOKEN is not None:
         env['HUGGING_FACE_HUB_TOKEN'] = HUGGING_FACE_HUB_TOKEN
 
+    image_uri = None
+    if task == HuggingFaceTask.TextGeneration and instance_type == EC2Instance.LARGE:
+        env['SM_NUM_GPUS'] = json.dumps(4)
+        env['HF_MODEL_QUANTIZE'] = "bitsandbytes"
+        image_uri = get_huggingface_llm_image_uri(
+            "huggingface",
+            version="1.0.3"
+        )
+
     huggingface_model = HuggingFaceModel(
         env=env,
         role=SAGEMAKER_ROLE,
         transformers_version="4.37",
         pytorch_version="2.1",
-        py_version="py310"
+        py_version="py310",
+        image_uri=image_uri
     )
 
     dt_string = datetime.datetime.now().strftime("%Y%m%d%H%M")

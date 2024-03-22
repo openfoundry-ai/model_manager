@@ -1,6 +1,12 @@
 from enum import StrEnum
 
 
+class EC2Instance(StrEnum):
+    SMALL = "ml.m5.xlarge"
+    MEDIUM = "ml.p3.2xlarge"
+    LARGE = "ml.g5.12xlarge"
+
+
 class HuggingFaceTask(StrEnum):
     AudioClassification = "audio-classification"
     AutomaticSpeechRecognition = "automatic-speech-recognition"

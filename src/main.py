@@ -4,6 +4,7 @@ logging.getLogger("sagemaker.config").setLevel(logging.WARNING)
 logging.getLogger("botocore.credentials").setLevel(logging.WARNING)
 import sagemaker
 import boto3
+from InquirerPy import prompt
 from .sagemaker_helpers.create_sagemaker_model import create_and_deploy_jumpstart_model, deploy_huggingface_model
 from .sagemaker_helpers.delete_sagemaker_model import delete_sagemaker_model
 from .sagemaker_helpers.sagemaker_resources import list_sagemaker_endpoints, select_instance
@@ -140,15 +141,19 @@ def main(args, loglevel):
                     continue
 
                 questions = [
-                    inquirer.List('endpoint',
-                                  message="Which endpoint would you like to query?",
-                                  choices=[endpoint['EndpointName']
-                                           for endpoint in active_endpoints]
-                                  ),
-                    inquirer.Text(
-                        name='query', message='What would you like to query?')
+                    {
+                        "type": "list",
+                        "message": "Which endpoint would you like to query?",
+                        "name": 'endpoint',
+                        "choices": [endpoint['EndpointName'] for endpoint in active_endpoints]
+                    },
+                    {
+                        "type": "input",
+                        "message": "What would you like to query?",
+                        "name": 'query'
+                    }
                 ]
-                answers = inquirer.prompt(questions)
+                answers = prompt(questions)
                 if (answers is None):
                     continue
 
