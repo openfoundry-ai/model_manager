@@ -202,7 +202,6 @@ Any model endpoints you spin up will run continuously unless you deactivate them
 
 ## Known issues
 - [ ]  Querying within Model Manager currently only works with text-based model - doesn’t work with multimodal, image generation, etc.
-- [ ]  Long HF model names (longer than 50 characters) and names with special characters other  than `-` breaks.
 - [ ]  Model versions are static.
 - [ ]  Querying endpoints with different expected formats
 - [ ]  Deleting a model is not instant, it may show up briefly after it was queued for deletion
