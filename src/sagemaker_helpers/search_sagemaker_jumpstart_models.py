@@ -1,9 +1,8 @@
-import boto3
 import inquirer
-import sagemaker
 from enum import StrEnum, auto
 from sagemaker.jumpstart.notebook_utils import list_jumpstart_models
 from src.utils.rich_utils import print_error
+from src.session import session, sagemaker_session
 
 
 class Frameworks(StrEnum):
@@ -21,10 +20,6 @@ class Frameworks(StrEnum):
 
 
 def search_sagemaker_jumpstart_model():
-    """TODO: Pass region"""
-    session = boto3.session.Session()
-    sagemaker_session = sagemaker.session.Session(boto_session=session)
-
     questions = [
         inquirer.List('framework',
                       message="Which framework would you like to use?",
@@ -40,7 +35,7 @@ def search_sagemaker_jumpstart_model():
     filter_value = "framework == {}".format(answers["framework"])
 
     models = list_jumpstart_models(filter=filter_value,
-                                   region='us-east-1', sagemaker_session=sagemaker_session)
+                                   region=session.region_name, sagemaker_session=sagemaker_session)
 
     if model_filter is not None:
         models = list(filter(lambda x: model_filter in x, models))

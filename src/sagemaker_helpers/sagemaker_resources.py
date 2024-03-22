@@ -1,9 +1,8 @@
 import boto3
-import inquirer
-from typing import List
-from rich import print
-from enum import StrEnum
-from . import EC2Instance
+from InquirerPy import inquirer
+from src.sagemaker_helpers import EC2Instance
+from src.console import console
+from typing import List, Tuple
 
 
 def list_sagemaker_endpoints(filter_str: str = None) -> List[str]:
@@ -21,23 +20,54 @@ def list_sagemaker_endpoints(filter_str: str = None) -> List[str]:
     return endpoints
 
 
-def list_service_quotas():
+def list_service_quotas() -> List[Tuple[str, int]]:
+    """ Gets a list of EC2 instances for inference """
+
     client = boto3.client('service-quotas')
-    response = client.list_service_quotas(
-        ServiceCode="sagemaker"
-    )
-    print(response)
-
-
-def select_instance() -> EC2Instance:
-    questions = [
-        inquirer.List(
-            'instance',
-            message="Choose an instance size (note: ml.m5.xlarge available by default; you must request quota from AWS to use other instance types)",
-            choices=[instance for instance in EC2Instance]
+    quotas = []
+    try:
+        response = client.list_service_quotas(
+            ServiceCode="sagemaker",
+            MaxResults=100,
         )
-    ]
-    answers = inquirer.prompt(questions)
-    if answers is None:
+        next_token = response.get('NextToken')
+        quotas = response['Quotas']
+        while next_token is not None:
+            response = client.list_service_quotas(
+                ServiceCode="sagemaker",
+                NextToken=next_token,
+            )
+            quotas.extend(response['Quotas'])
+            next_token = response.get('NextToken')
+    except client.exceptions.AccessDeniedException as error:
+        console.print(
+            "[red]User does not have access to Service Quotas. Grant access via IAM to get the list of available instances")
+        return []
+
+    # TODO: Filter for different usages
+    available_instances = list(filter(lambda x: 'endpoint usage' in x[0] and x[1] > 0, [
+                               (quota['QuotaName'], quota['Value']) for quota in quotas]))
+
+    # Clean up quota names
+    available_instances = [(instance[0].split(" ")[0], instance[1])
+                           for instance in available_instances]
+    return available_instances
+
+
+def list_service_quotas_async(instances=[]):
+    """ Wrapper to allow access to list in threading """
+    instances = instances.extend(list_service_quotas())
+    return instances
+
+
+def select_instance(available_instances=None):
+    choices = [instance[0] for instance in available_instances] or [
+        instance for instance in EC2Instance]
+    instance = inquirer.fuzzy(
+        message="Choose an instance size (note: ml.m5.xlarge available by default; you must request quota from AWS to use other instance types):",
+        choices=choices,
+        default="ml.m5."
+    ).execute()
+    if instance is None:
         return
-    return answers['instance']
+    return instance

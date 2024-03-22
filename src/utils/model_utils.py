@@ -1,8 +1,8 @@
-from src.sagemaker_helpers.search_sagemaker_jumpstart_models import Frameworks
-from huggingface_hub import HfApi
-from .rich_utils import print_error
 from difflib import SequenceMatcher
 from dotenv import dotenv_values
+from huggingface_hub import HfApi
+from src.sagemaker_helpers.search_sagemaker_jumpstart_models import Frameworks
+from src.utils.rich_utils import print_error
 HUGGING_FACE_HUB_TOKEN = dotenv_values(".env").get("HUGGING_FACE_HUB_KEY")
 
 
