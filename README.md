@@ -207,7 +207,7 @@ Any model endpoints you spin up will run continuously unless you deactivate them
 - [ ]  Deleting a model is not instant, it may show up briefly after it was queued for deletion
 - [ ]  Deploying the same model within the same minute will break
 
-See [open issues](https://github.com/UnidataHQ/model_manager/issues) for a full list of known issues and proposed features.
+See [open issues](https://github.com/openfoundry-ai/model_manager/issues) for a full list of known issues and proposed features.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
