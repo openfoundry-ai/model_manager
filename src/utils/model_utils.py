@@ -11,7 +11,12 @@ def is_sagemaker_model(endpoint_name: str) -> bool:
     return endpoint_name.find("--") == -1
 
 
+def is_custom_model(endpoint_name: str) -> bool:
+    return endpoint_name.startswith('custom')
+
+
 def get_sagemaker_framework_and_task(endpoint_or_model_name: str):
+    endpoint_or_model_name = endpoint_or_model_name.removeprefix('custom-')
     if not is_sagemaker_model(endpoint_or_model_name):
         return None
     components = endpoint_or_model_name.split('-')
@@ -33,6 +38,7 @@ def get_hugging_face_pipeline_task(model_name: str):
 
 
 def get_model_name_from_hugging_face_endpoint(endpoint_name: str):
+    endpoint_name = endpoint_name.removeprefix("custom-")
     endpoint_name = endpoint_name.replace("--", "/")
     author, rest = endpoint_name.split("/")
 
