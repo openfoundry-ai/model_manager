@@ -57,7 +57,7 @@ def query_hugging_face_endpoint(endpoint_name: str, query: str):
         answers = inquirer.prompt(questions)
         if answers is None:
             print_error(
-                "must provide lables for zero shot text classification")
+                "must provide labels for zero shot text classification")
             return
         labels = answers['labels'].split(',')
         input = json.dumps({
@@ -164,7 +164,7 @@ https://docs.aws.amazon.com/sagemaker/latest/APIReference/API_runtime_InvokeEndp
             answers = inquirer.prompt(questions)
             if answers is None:
                 print_error(
-                    "must provide lables for zero shot text classification")
+                    "must provide labels for zero shot text classification")
                 return
             labels = answers['labels'].split(',')
 
