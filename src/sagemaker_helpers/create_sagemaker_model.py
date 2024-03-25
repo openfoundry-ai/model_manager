@@ -131,8 +131,8 @@ def deploy_custom_huggingface_model(s3_path, base_model, instance_type: str, ins
             console.print_exception()
             quit()
 
-    # print_success(
-    #     f"{model_id} is now up and running at the endpoint [blue]{predictor.endpoint_name}")
+    print_success(
+        f"Custom {base_model} is now up and running at the endpoint [blue]{predictor.endpoint_name}")
     return predictor
 
 

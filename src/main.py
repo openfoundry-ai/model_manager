@@ -13,6 +13,7 @@ from src.sagemaker_helpers.search_sagemaker_jumpstart_models import search_sagem
 from src.utils.rich_utils import print_error, print_success
 from src.utils.aws_utils import construct_s3_uri
 from src.session import sagemaker_session
+from src.console import console
 from enum import StrEnum
 from rich import print
 
@@ -188,17 +189,22 @@ def deploy_model(instances, instance_thread):
                 },
                 {
                     "type": "input",
-                    "message": "What is the base model from HF that was fine tuned? (e.g. google-bert/bert-base-uncased)",
+                    "message": "What is the base model that was fine tuned? (e.g. google-bert/bert-base-uncased)",
                     "name": "base_model"
                 }
             ]
             answers = prompt(questions)
-            path = answers['path']
+            local_path = answers['path']
             base_model = answers['base_model']
 
             bucket = sagemaker_session.default_bucket()
-            s3_path = S3Uploader.upload(
-                path, construct_s3_uri(bucket, f"models/{base_model}"))
+            s3_path = construct_s3_uri(bucket, f"models/{base_model}")
+            with console.status(f"[bold green]Uploading custom {base_model} model to S3 at {s3_path}...") as status:
+                try:
+                    s3_path = S3Uploader.upload(
+                        local_path, s3_path)
+                except Exception:
+                    print_error("[red] Model failed to upload to S3")
 
             instance_thread.join()
             instance_type = select_instance(instances)
