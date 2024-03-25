@@ -5,9 +5,16 @@ from InquirerPy import prompt
 from sagemaker.huggingface.model import HuggingFacePredictor
 from src.console import console
 from src.sagemaker_helpers import SagemakerTask, HuggingFaceTask
-from src.utils.model_utils import get_hugging_face_pipeline_task, get_model_name_from_hugging_face_endpoint, get_sagemaker_framework_and_task
+from src.utils.model_utils import get_hugging_face_pipeline_task, get_model_name_from_hugging_face_endpoint, get_sagemaker_framework_and_task, is_custom_model, is_sagemaker_model
 from src.utils.rich_utils import print_error
 from src.session import sagemaker_session
+
+
+def query_endpoint(endpoint_name: str, query: str):
+    if is_sagemaker_model(endpoint_name):
+        query_sagemaker_endpoint(endpoint_name, query)
+    else:
+        query_hugging_face_endpoint(endpoint_name, query)
 
 
 def parse_response(query_response):
@@ -41,6 +48,22 @@ def query_hugging_face_endpoint(endpoint_name: str, query: str):
             "temperature": 0.9,
             "return_full_text": True,
         }
+    if task is not None and task == HuggingFaceTask.ZeroShotClassification:
+        questions = [
+            inquirer.Text('labels',
+                          message="What labels would you like to use? (comma separated values)?",
+                          )
+        ]
+        answers = inquirer.prompt(questions)
+        if answers is None:
+            print_error(
+                "must provide labels for zero shot text classification")
+            return
+        labels = answers['labels'].split(',')
+        input = json.dumps({
+            "sequences": "query",
+            "candidate_labels": labels
+        })
 
     try:
         result = predictor.predict(input)
@@ -102,11 +125,13 @@ https://docs.aws.amazon.com/sagemaker/latest/APIReference/API_runtime_InvokeEndp
     match task:
         case SagemakerTask.ExtractiveQuestionAnswering:
             questions = [
-                inquirer.Text('context',
-                              message="What context would you like to provide?",
-                              )
+                {
+                    'type': 'input',
+                    'name': 'context',
+                    'message': "What context would you like to provide?",
+                }
             ]
-            answers = inquirer.prompt(questions)
+            answers = prompt(questions)
             if answers is None:
                 print_error("must provide context for question-answering")
                 return
@@ -139,7 +164,7 @@ https://docs.aws.amazon.com/sagemaker/latest/APIReference/API_runtime_InvokeEndp
             answers = inquirer.prompt(questions)
             if answers is None:
                 print_error(
-                    "must provide lables for zero shot text classification")
+                    "must provide labels for zero shot text classification")
                 return
             labels = answers['labels'].split(',')
 

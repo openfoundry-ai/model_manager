@@ -1,4 +1,3 @@
-import boto3
 import datetime
 import json
 from dotenv import dotenv_values
@@ -92,6 +91,48 @@ def deploy_huggingface_model(model_id, instance_type: str, instance_count: int =
 
     print_success(
         f"{model_id} is now up and running at the endpoint [blue]{predictor.endpoint_name}")
+    return predictor
+
+
+def deploy_custom_huggingface_model(s3_path, base_model, instance_type: str, instance_count: int = 1):
+    region_name = session.region_name
+    dt_string = datetime.datetime.now().strftime("%Y%m%d%H%M")
+    # Endpoint name must be < 63 characters
+    model_string = base_model.replace(
+        "/", "--").replace("_", "-").replace(".", "")[:43]
+    endpoint_name = f"custom-{model_string}-{dt_string}"
+
+    # create Hugging Face Model Class
+    huggingface_model = HuggingFaceModel(
+        # path to your trained sagemaker model
+        model_data=s3_path,
+        role=SAGEMAKER_ROLE,  # iam role with permissions to create an Endpoint
+        transformers_version="4.37",
+        pytorch_version="2.1",
+        py_version="py310",
+    )
+
+    with console.status("[bold green]Deploying model...") as status:
+        table = Table(show_header=False, header_style="magenta")
+        table.add_column("Resource", style="dim")
+        table.add_column("Value", style="blue")
+        table.add_row("S3 Path", s3_path)
+        table.add_row("EC2 instance type", instance_type)
+        table.add_row("Number of instances", str(instance_count))
+        console.print(table)
+
+        try:
+            predictor = huggingface_model.deploy(
+                initial_instance_count=instance_count,
+                instance_type=instance_type,
+                endpoint_name=endpoint_name
+            )
+        except Exception:
+            console.print_exception()
+            quit()
+
+    print_success(
+        f"Custom {base_model} is now up and running at the endpoint [blue]{predictor.endpoint_name}")
     return predictor
 
 
