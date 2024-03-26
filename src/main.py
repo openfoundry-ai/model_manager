@@ -150,7 +150,6 @@ def deploy_model(instances, instance_thread):
                     "message": "Choose a model. Search by task (e.g. eqa) or model name (e.g. llama):",
                     "choices": models,
                     "match_exact": True,
-                    "default": "eqa"
                 }
             ]
             answers = prompt(questions)
