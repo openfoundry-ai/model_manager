@@ -144,13 +144,15 @@ def deploy_model(instances, instance_thread):
                     quit()
 
             questions = [
-                inquirer.List(
-                    'model_id',
-                    message="Choose a model",
-                    choices=[model for model in models]
-                )
+                {
+                    "type": "fuzzy",
+                    "name": "model_id",
+                    "message": "Choose a model. Search by task (e.g. eqa) or model name (e.g. llama):",
+                    "choices": models,
+                    "match_exact": True,
+                }
             ]
-            answers = inquirer.prompt(questions)
+            answers = prompt(questions)
             if (answers is None):
                 return
 
