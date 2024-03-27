@@ -46,7 +46,7 @@ def deploy_huggingface_model(model_id, instance_type: str, instance_count: int =
         env['HF_MODEL_QUANTIZE'] = "bitsandbytes"
         image_uri = get_huggingface_llm_image_uri(
             "huggingface",
-            version="1.0.3"
+            version="1.4.2"
         )
 
     huggingface_model = HuggingFaceModel(
