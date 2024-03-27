@@ -1,7 +1,8 @@
 import boto3
+from functools import lru_cache
 from InquirerPy import inquirer
-from src.sagemaker_helpers import EC2Instance
 from src.console import console
+from src.sagemaker_helpers import EC2Instance
 from typing import List, Tuple
 
 
@@ -20,6 +21,7 @@ def list_sagemaker_endpoints(filter_str: str = None) -> List[str]:
     return endpoints
 
 
+@lru_cache
 def list_service_quotas() -> List[Tuple[str, int]]:
     """ Gets a list of EC2 instances for inference """
 

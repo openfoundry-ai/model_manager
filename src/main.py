@@ -1,8 +1,6 @@
 import inquirer
 import logging
 import threading
-logging.getLogger("sagemaker.config").setLevel(logging.WARNING)
-logging.getLogger("botocore.credentials").setLevel(logging.WARNING)
 from InquirerPy import prompt
 from sagemaker.s3 import S3Uploader
 from src.sagemaker_helpers.create_sagemaker_model import create_and_deploy_jumpstart_model, deploy_huggingface_model, deploy_custom_huggingface_model
@@ -11,7 +9,7 @@ from src.sagemaker_helpers.sagemaker_resources import list_sagemaker_endpoints, 
 from src.sagemaker_helpers.query_sagemaker_endpoint import query_endpoint
 from src.sagemaker_helpers.search_sagemaker_jumpstart_models import search_sagemaker_jumpstart_model
 from src.utils.rich_utils import print_error, print_success
-from src.utils.aws_utils import construct_s3_uri
+from src.utils.aws_utils import construct_s3_uri, is_s3_uri
 from src.session import sagemaker_session
 from src.console import console
 from enum import StrEnum
@@ -186,7 +184,7 @@ def deploy_model(instances, instance_thread):
             questions = [
                 {
                     "type": "input",
-                    "message": "What is the local path of the model?",
+                    "message": "What is the local path or S3 URI of the model?",
                     "name": "path"
                 },
                 {
@@ -199,14 +197,17 @@ def deploy_model(instances, instance_thread):
             local_path = answers['path']
             base_model = answers['base_model']
 
-            bucket = sagemaker_session.default_bucket()
-            s3_path = construct_s3_uri(bucket, f"models/{base_model}")
-            with console.status(f"[bold green]Uploading custom {base_model} model to S3 at {s3_path}...") as status:
-                try:
-                    s3_path = S3Uploader.upload(
-                        local_path, s3_path)
-                except Exception:
-                    print_error("[red] Model failed to upload to S3")
+            if not is_s3_uri(local_path):
+                bucket = sagemaker_session.default_bucket()
+                s3_path = construct_s3_uri(bucket, f"models/{base_model}")
+                with console.status(f"[bold green]Uploading custom {base_model} model to S3 at {s3_path}...") as status:
+                    try:
+                        s3_path = S3Uploader.upload(
+                            local_path, s3_path)
+                    except Exception:
+                        print_error("[red] Model failed to upload to S3")
+            else:
+                s3_path = local_path
 
             instance_thread.join()
             instance_type = select_instance(instances)

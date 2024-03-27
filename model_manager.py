@@ -1,5 +1,7 @@
 import argparse
 import logging
+logging.getLogger("sagemaker.config").setLevel(logging.WARNING)
+logging.getLogger("botocore.credentials").setLevel(logging.WARNING)
 import os
 from pathlib import Path
 from src.sagemaker_helpers.create_sagemaker_model import deploy_huggingface_model
