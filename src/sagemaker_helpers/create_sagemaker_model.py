@@ -117,6 +117,7 @@ def deploy_custom_huggingface_model(deployment_config: DeploymentConfig, model_c
     region_name = session.region_name
     if model_config.location is None:
         print_error("Missing model source location.")
+        return
 
     s3_path = model_config.location
     if not is_s3_uri(model_config.location):
