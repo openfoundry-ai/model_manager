@@ -1,10 +1,14 @@
 import argparse
 import logging
+import traceback
 logging.getLogger("sagemaker.config").setLevel(logging.WARNING)
 logging.getLogger("botocore.credentials").setLevel(logging.WARNING)
 import os
+from yaml import load, CSafeLoader
 from pathlib import Path
-from src.sagemaker_helpers.create_sagemaker_model import deploy_huggingface_model
+from src.sagemaker_helpers.create_sagemaker_model import deploy_huggingface_model, deploy_model_config
+from src.schemas import DeploymentConfig, ModelConfig
+
 
 if __name__ == '__main__':
     # Run setup if these files/directories don't already exist
@@ -26,6 +30,11 @@ if __name__ == '__main__':
         type=str
     )
     parser.add_argument(
+        "--config",
+        help="path to YAML configuration file",
+        type=str
+    )
+    parser.add_argument(
         "-v",
         "--verbose",
         help="increase output verbosity",
@@ -41,6 +50,23 @@ if __name__ == '__main__':
     if args.hf is not None:
         instance_type = args.instance or "ml.m5.xlarge"
         predictor = deploy_huggingface_model(args.hf, instance_type)
+        quit()
+
+    if args.config is not None:
+        try:
+            deployment_config = None
+            model_config = None
+            with open(args.config) as config:
+                configuration = load(config, CSafeLoader)
+                deployment_config = DeploymentConfig(
+                    **configuration['deployment'])
+                model_config = ModelConfig(**configuration['model'])
+            deploy_model_config(deployment_config, model_config)
+        except:
+            traceback.print_exc()
+            print("File not found")
+
+        quit()
 
     from src.main import main
     main(args, loglevel)

@@ -1,0 +1,16 @@
+deployment:
+  destination: aws
+  endpoint_name: meta-llama--Llama-2-7b-hf
+  instance_count: 1
+  instance_type: ml.g5.12xlarge
+  num_gpus: 4
+  # quantization: bitsandbytes
+
+model:
+  model_id: meta-llama/Llama-2-7b-hf
+  source: huggingface
+  predict:
+    temperature: 0.9
+    top_p: 0.9
+    top_k: 20
+    max_new_tokens: 250

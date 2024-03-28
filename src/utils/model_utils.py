@@ -1,9 +1,21 @@
+import datetime
 from difflib import SequenceMatcher
 from dotenv import dotenv_values
 from huggingface_hub import HfApi
-from src.sagemaker_helpers.search_sagemaker_jumpstart_models import Frameworks
 from src.utils.rich_utils import print_error
 HUGGING_FACE_HUB_TOKEN = dotenv_values(".env").get("HUGGING_FACE_HUB_KEY")
+
+
+def get_unique_endpoint_name(model_id: str, endpoint_name: str = None):
+    dt_string = datetime.datetime.now().strftime("%Y%m%d%H%M")
+
+    if not endpoint_name:
+        # Endpoint name must be < 63 characters
+        model_string = model_id.replace(
+            "/", "--").replace("_", "-").replace(".", "")[:50]
+        return f"{model_string}-{dt_string}"
+    else:
+        return f"{endpoint_name[:50]}-{dt_string}"
 
 
 def is_sagemaker_model(endpoint_name: str) -> bool:
