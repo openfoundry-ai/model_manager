@@ -1,0 +1,14 @@
+deployment:
+  destination: aws
+  # Endpoint name matches model_id for querying atm.
+  endpoint_name: huggingface-eqa-bert-base-cased
+  instance_count: 1
+  instance_type: ml.m5.xlarge
+
+model:
+  # Base model id that was finetuned
+  model_id: huggingface-eqa-bert-base-cased
+  source: custom
+
+  # local or S3 path
+  location: ./models/model.tar.gz

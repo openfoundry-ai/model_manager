@@ -2,16 +2,14 @@ import inquirer
 import logging
 import threading
 from InquirerPy import prompt
-from sagemaker.s3 import S3Uploader
+from src.sagemaker_helpers import EC2Instance
 from src.sagemaker_helpers.create_sagemaker_model import create_and_deploy_jumpstart_model, deploy_huggingface_model, deploy_custom_huggingface_model
 from src.sagemaker_helpers.delete_sagemaker_model import delete_sagemaker_model
 from src.sagemaker_helpers.sagemaker_resources import list_sagemaker_endpoints, select_instance, list_service_quotas_async
 from src.sagemaker_helpers.query_sagemaker_endpoint import query_endpoint
 from src.sagemaker_helpers.search_sagemaker_jumpstart_models import search_sagemaker_jumpstart_model
 from src.utils.rich_utils import print_error, print_success
-from src.utils.aws_utils import construct_s3_uri, is_s3_uri
-from src.session import sagemaker_session
-from src.console import console
+from src.schemas import DeploymentConfig, ModelConfig, ModelSource
 from enum import StrEnum
 from rich import print
 
@@ -157,10 +155,20 @@ def deploy_model(instances, instance_thread):
             model_id, model_version = answers['model_id'], "2.*"
             instance_thread.join()
             instance_type = select_instance(instances)
+
+            model_config = ModelConfig(
+                model_id=model_id,
+                model_version=model_version,
+                source=ModelSource.Sagemaker
+            )
+
+            deployment_config = DeploymentConfig(
+                instance_type=instance_type,
+                num_gpus=4 if instance_type == EC2Instance.LARGE else 1
+            )
+
             predictor = create_and_deploy_jumpstart_model(
-                model_id, model_version, instance_type)
-            if predictor is None:
-                return
+                deployment_config=deployment_config, model_config=model_config)
         case ModelType.HUGGINGFACE:
             questions = [
                 inquirer.Text(
@@ -175,10 +183,18 @@ def deploy_model(instances, instance_thread):
             model_id = answers['model_id']
             instance_thread.join()
             instance_type = select_instance(instances)
-            predictor = deploy_huggingface_model(model_id, instance_type)
 
-            if predictor is None:
-                return
+            model_config = ModelConfig(
+                model_id=model_id,
+                source=ModelSource.HuggingFace
+            )
+
+            deployment_config = DeploymentConfig(
+                instance_type=instance_type
+            )
+
+            predictor = deploy_huggingface_model(
+                deployment_config=deployment_config, model_config=model_config)
 
         case ModelType.CUSTOM:
             questions = [
@@ -197,18 +213,17 @@ def deploy_model(instances, instance_thread):
             local_path = answers['path']
             base_model = answers['base_model']
 
-            if not is_s3_uri(local_path):
-                bucket = sagemaker_session.default_bucket()
-                s3_path = construct_s3_uri(bucket, f"models/{base_model}")
-                with console.status(f"[bold green]Uploading custom {base_model} model to S3 at {s3_path}...") as status:
-                    try:
-                        s3_path = S3Uploader.upload(
-                            local_path, s3_path)
-                    except Exception:
-                        print_error("[red] Model failed to upload to S3")
-            else:
-                s3_path = local_path
-
             instance_thread.join()
             instance_type = select_instance(instances)
-            deploy_custom_huggingface_model(s3_path, base_model, instance_type)
+
+            model_config = ModelConfig(
+                model_id=base_model,
+                source=ModelSource.Custom,
+                location=local_path
+            )
+
+            deployment_config = DeploymentConfig(
+                instance_type=instance_type
+            )
+            deploy_custom_huggingface_model(
+                deployment_config=deployment_config, model_config=model_config)
