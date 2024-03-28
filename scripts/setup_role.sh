@@ -1,13 +1,17 @@
 #!/usr/bin/env bash
 
 # This script creates a role named SageMakerRole
-# that can be used by SageMaker and has Full access to S3.
+# that can be used by SageMaker and has access to S3.
 
 ROLE_NAME=SageMakerRole
 
 # Creates a AWS policy for full access to sagemaker
 POLICY=arn:aws:iam::aws:policy/AmazonSageMakerFullAccess
 
+if `aws iam get-role --role-name ${ROLE_NAME} &> /dev/null` ; then 
+	echo "SAGEMAKER_ROLE=`aws iam get-role --role-name ${ROLE_NAME} | grep -Eo '"arn:aws:iam.*?[^\\]"'`" >> .env
+	exit
+fi
 
 cat <<EOF > /tmp/assume-role-policy-document.json
 {
