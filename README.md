@@ -6,8 +6,7 @@
 <div align="center">
   <h3 align="center">Model Manager v0.1, by</h3>
 
-![Color logo with background - small](https://github.com/openfoundry-ai/model_manager/assets/152243036/59c92b8e-04e5-4f91-8f68-6875278dbbc6)
-
+![openfoundry white](https://github.com/openfoundry-ai/model_manager/assets/152243036/01b64d39-1402-45b6-8dce-8b4626c41935)
 
   <p align="center">
     Deploy open source AI models to AWS in minutes.
