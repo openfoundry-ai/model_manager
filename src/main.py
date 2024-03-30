@@ -3,13 +3,15 @@ import logging
 import threading
 from InquirerPy import prompt
 from src.sagemaker_helpers import EC2Instance
-from src.sagemaker_helpers.create_sagemaker_model import create_and_deploy_jumpstart_model, deploy_huggingface_model, deploy_custom_huggingface_model
+from src.sagemaker_helpers.create_sagemaker_model import deploy_model
 from src.sagemaker_helpers.delete_sagemaker_model import delete_sagemaker_model
 from src.sagemaker_helpers.sagemaker_resources import list_sagemaker_endpoints, select_instance, list_service_quotas_async
 from src.sagemaker_helpers.query_sagemaker_endpoint import query_endpoint
 from src.sagemaker_helpers.search_sagemaker_jumpstart_models import search_sagemaker_jumpstart_model
 from src.utils.rich_utils import print_error, print_success
-from src.schemas import DeploymentConfig, ModelConfig, ModelSource
+from src.schemas.deployment import Deployment
+from src.schemas.model import Model, ModelSource
+from src.config import get_configs
 from enum import StrEnum
 from rich import print
 
@@ -38,7 +40,7 @@ def main(args, loglevel):
 
     while True:
         active_endpoints = list_sagemaker_endpoints()
-
+        configs = get_configs()
         questions = [
             inquirer.List(
                 'action',
@@ -61,7 +63,7 @@ def main(args, loglevel):
                 else:
                     print_error('No active endpoints.\n')
             case Actions.DEPLOY:
-                deploy_model(instances, instance_thread)
+                build_and_deploy_model(instances, instance_thread)
             case Actions.DELETE:
                 if (len(active_endpoints) == 0):
                     print_success("No Endpoints to delete!")
@@ -117,7 +119,7 @@ class ModelType(StrEnum):
     CUSTOM = "Deploy a custom model"
 
 
-def deploy_model(instances, instance_thread):
+def build_and_deploy_model(instances, instance_thread):
     questions = [
         inquirer.List(
             'model_type',
@@ -156,19 +158,18 @@ def deploy_model(instances, instance_thread):
             instance_thread.join()
             instance_type = select_instance(instances)
 
-            model_config = ModelConfig(
+            model = Model(
                 model_id=model_id,
                 model_version=model_version,
-                source=ModelSource.Sagemaker
+                source=ModelSource.Sagemaker.value
             )
 
-            deployment_config = DeploymentConfig(
+            deployment = Deployment(
                 instance_type=instance_type,
                 num_gpus=4 if instance_type == EC2Instance.LARGE else 1
             )
 
-            predictor = create_and_deploy_jumpstart_model(
-                deployment_config=deployment_config, model_config=model_config)
+            predictor = deploy_model(deployment=deployment, model=model)
         case ModelType.HUGGINGFACE:
             questions = [
                 inquirer.Text(
@@ -184,17 +185,16 @@ def deploy_model(instances, instance_thread):
             instance_thread.join()
             instance_type = select_instance(instances)
 
-            model_config = ModelConfig(
+            model = Model(
                 model_id=model_id,
-                source=ModelSource.HuggingFace
+                source=ModelSource.HuggingFace.value
             )
 
-            deployment_config = DeploymentConfig(
+            deployment = Deployment(
                 instance_type=instance_type
             )
 
-            predictor = deploy_huggingface_model(
-                deployment_config=deployment_config, model_config=model_config)
+            predictor = deploy_model(deployment=deployment, model=model)
 
         case ModelType.CUSTOM:
             questions = [
@@ -216,14 +216,13 @@ def deploy_model(instances, instance_thread):
             instance_thread.join()
             instance_type = select_instance(instances)
 
-            model_config = ModelConfig(
+            model = Model(
                 model_id=base_model,
-                source=ModelSource.Custom,
+                source=ModelSource.Custom.value,
                 location=local_path
             )
 
-            deployment_config = DeploymentConfig(
+            deployment = Deployment(
                 instance_type=instance_type
             )
-            deploy_custom_huggingface_model(
-                deployment_config=deployment_config, model_config=model_config)
+            deploy_model(deployment=deployment, model=model)

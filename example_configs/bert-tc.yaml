@@ -1,8 +1,9 @@
 # Minimum deployment config
-deployment:
+deployment: !Deployment
   destination: aws
   instance_type: ml.m5.xlarge
 
-model:
+models:
+- !Model
   model_id: huggingface-tc-bert-large-cased
   source: sagemaker

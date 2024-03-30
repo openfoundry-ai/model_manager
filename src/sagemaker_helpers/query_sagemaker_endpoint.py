@@ -4,7 +4,8 @@ import inquirer
 from InquirerPy import prompt
 from sagemaker.huggingface.model import HuggingFacePredictor
 from src.console import console
-from src.sagemaker_helpers import SagemakerTask, HuggingFaceTask
+from src.sagemaker_helpers import SagemakerTask
+from src.huggingface import HuggingFaceTask
 from src.utils.model_utils import get_hugging_face_pipeline_task, get_model_name_from_hugging_face_endpoint, get_sagemaker_framework_and_task, is_custom_model, is_sagemaker_model
 from src.utils.rich_utils import print_error
 from src.session import sagemaker_session
