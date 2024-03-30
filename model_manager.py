@@ -1,13 +1,13 @@
 import argparse
 import logging
 import traceback
+import yaml
 logging.getLogger("sagemaker.config").setLevel(logging.WARNING)
 logging.getLogger("botocore.credentials").setLevel(logging.WARNING)
 import os
-from yaml import load, CSafeLoader
-from pathlib import Path
-from src.sagemaker_helpers.create_sagemaker_model import deploy_huggingface_model, deploy_model_config
-from src.schemas import DeploymentConfig, ModelConfig
+from src.sagemaker_helpers.create_sagemaker_model import deploy_huggingface_model, deploy_model
+from src.schemas.deployment import Deployment
+from src.schemas.model import Model
 
 
 if __name__ == '__main__':
@@ -54,14 +54,15 @@ if __name__ == '__main__':
 
     if args.config is not None:
         try:
-            deployment_config = None
-            model_config = None
+            deployment = None
+            model = None
             with open(args.config) as config:
-                configuration = load(config, CSafeLoader)
-                deployment_config = DeploymentConfig(
-                    **configuration['deployment'])
-                model_config = ModelConfig(**configuration['model'])
-            deploy_model_config(deployment_config, model_config)
+                configuration = yaml.safe_load(config)
+                deployment = configuration['deployment']
+
+                # TODO: Support multi-model endpoints
+                model = configuration['models'][0]
+            deploy_model(deployment, model)
         except:
             traceback.print_exc()
             print("File not found")

@@ -1,4 +1,4 @@
-deployment:
+deployment: !Deployment
   destination: aws
   endpoint_name: meta-llama--Llama-2-7b-hf
   instance_count: 1
@@ -6,7 +6,8 @@ deployment:
   num_gpus: 4
   # quantization: bitsandbytes
 
-model:
+models:
+- !Model
   model_id: meta-llama/Llama-2-7b-hf
   source: huggingface
   predict:
