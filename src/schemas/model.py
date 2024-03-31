@@ -1,6 +1,6 @@
 import yaml
 from src.yaml import loader, dumper
-from typing import Optional, Union
+from typing import Optional, Union, Dict
 from enum import StrEnum
 from dataclasses import dataclass
 from src.huggingface import HuggingFaceTask
@@ -20,6 +20,7 @@ class Model():
     task: Optional[Union[HuggingFaceTask, SagemakerTask]] = None
     model_version: Optional[str] = None
     location: Optional[str] = None
+    predict: Optional[Dict[str, str]] = None
 
     def __init__(self, **args):
         # TODO: Validations
@@ -33,6 +34,7 @@ def model_representer(dumper: yaml.SafeDumper, model: Model) -> yaml.nodes.Mappi
         "task": model.task,
         "model_version": model.model_version,
         "location": model.location,
+        "predict": model.predict,
     })
 
 

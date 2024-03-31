@@ -106,7 +106,7 @@ def main(args, loglevel):
 
                 endpoint = answers['endpoint']
                 query = answers['query']
-                query_endpoint(endpoint, query)
+                query_endpoint(endpoint, query, configs)
             case Actions.EXIT:
                 quit()
 
