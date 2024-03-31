@@ -1,6 +1,6 @@
 deployment: !Deployment
   destination: aws
-  endpoint_name: meta-llama--Llama-2-7b-hf
+  endpoint_name: test-llama2-7b
   instance_count: 1
   instance_type: ml.g5.12xlarge
   num_gpus: 4

@@ -6,16 +6,20 @@ from sagemaker.huggingface.model import HuggingFacePredictor
 from src.console import console
 from src.sagemaker_helpers import SagemakerTask
 from src.huggingface import HuggingFaceTask
-from src.utils.model_utils import get_hugging_face_pipeline_task, get_model_name_from_hugging_face_endpoint, get_sagemaker_framework_and_task, is_custom_model, is_sagemaker_model
+from src.utils.model_utils import get_model_and_task, is_sagemaker_model, get_text_generation_hyperpameters
 from src.utils.rich_utils import print_error
+from src.schemas.deployment import Deployment
+from src.schemas.model import Model
 from src.session import sagemaker_session
+from typing import Dict, Tuple
 
 
-def query_endpoint(endpoint_name: str, query: str):
-    if is_sagemaker_model(endpoint_name):
-        query_sagemaker_endpoint(endpoint_name, query)
+def query_endpoint(endpoint_name: str, query: str, configs: Dict[str, Tuple[Deployment, Model]]):
+    config = configs.get(endpoint_name)
+    if is_sagemaker_model(endpoint_name, config):
+        query_sagemaker_endpoint(endpoint_name, query, config)
     else:
-        query_hugging_face_endpoint(endpoint_name, query)
+        query_hugging_face_endpoint(endpoint_name, query, config)
 
 
 def parse_response(query_response):
@@ -25,9 +29,8 @@ def parse_response(query_response):
     return probabilities, labels, predicted_label
 
 
-def query_hugging_face_endpoint(endpoint_name: str, query: str):
-    model_name = get_model_name_from_hugging_face_endpoint(endpoint_name)
-    task = get_hugging_face_pipeline_task(model_name)
+def query_hugging_face_endpoint(endpoint_name: str, query: str, config: Tuple[Deployment, Model]):
+    task = get_model_and_task(endpoint_name, config)['task']
     predictor = HuggingFacePredictor(endpoint_name=endpoint_name,
                                      sagemaker_session=sagemaker_session)
 
@@ -42,13 +45,11 @@ def query_hugging_face_endpoint(endpoint_name: str, query: str):
         input = {}
         input['context'] = answers['context']
         input['question'] = query
+
     if task is not None and task == HuggingFaceTask.TextGeneration:
-        input['parameters'] = {
-            "max_new_tokens": 250,
-            "top_p": 0.9,
-            "temperature": 0.9,
-            "return_full_text": True,
-        }
+        parameters = get_text_generation_hyperpameters(config)
+        input['parameters'] = parameters
+
     if task is not None and task == HuggingFaceTask.ZeroShotClassification:
         questions = [
             inquirer.Text('labels',
@@ -76,11 +77,9 @@ def query_hugging_face_endpoint(endpoint_name: str, query: str):
     return result
 
 
-def query_sagemaker_endpoint(endpoint_name: str, query: str):
+def query_sagemaker_endpoint(endpoint_name: str, query: str, config: Tuple[Deployment, Model]):
     client = boto3.client('runtime.sagemaker')
-    newline, bold, unbold = '\n', '\033[1m', '\033[0m'
-
-    framework, task = get_sagemaker_framework_and_task(endpoint_name)
+    task = get_model_and_task(endpoint_name, config)['task']
 
     if task not in [
         SagemakerTask.ExtractiveQuestionAnswering,
@@ -111,18 +110,6 @@ https://docs.aws.amazon.com/sagemaker/latest/APIReference/API_runtime_InvokeEndp
     # Depending on the task, input needs to be formatted differently.
     # e.g. question-answering needs to have {question: , context: }
     input = query.encode("utf-8")
-    if framework == "meta":
-        input = json.dumps({
-            "inputs": query,
-            "parameters": {
-                "max_new_tokens": 250,
-                "top_p": 0.9,
-                "temperature": 0.9,
-                "return_full_text": True,
-            },
-        }).encode("utf-8")
-        content_type = "application/json"
-
     match task:
         case SagemakerTask.ExtractiveQuestionAnswering:
             questions = [
@@ -174,6 +161,13 @@ https://docs.aws.amazon.com/sagemaker/latest/APIReference/API_runtime_InvokeEndp
                 "sequences": query,
                 "candidate_labels": labels,
             }).encode("utf-8")
+        case SagemakerTask.TextGeneration:
+            parameters = get_text_generation_hyperpameters(config)
+            input = json.dumps({
+                "inputs": query,
+                "parameters": parameters,
+            }).encode("utf-8")
+            content_type = "application/json"
 
     try:
         response = client.invoke_endpoint(

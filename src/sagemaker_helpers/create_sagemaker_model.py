@@ -15,7 +15,7 @@ from src.session import session, sagemaker_session
 from src.console import console
 from src.utils.aws_utils import construct_s3_uri, is_s3_uri
 from src.utils.rich_utils import print_error, print_success
-from src.utils.model_utils import get_unique_endpoint_name
+from src.utils.model_utils import get_unique_endpoint_name, get_model_and_task
 from src.huggingface import HuggingFaceTask
 from src.huggingface.hf_hub_api import get_hf_task
 
@@ -229,6 +229,7 @@ def create_and_deploy_jumpstart_model(deployment: Deployment, model: Model):
         model.model_id, deployment.endpoint_name)
     deployment.endpoint_name = endpoint_name
     deployment.destination = Destination.AWS.value
+    model.task = get_model_and_task(model.model_id)['task']
 
     console.log(
         "Deploying model to AWS. [magenta]This may take up to 10 minutes for very large models.[/magenta] See full logs here:")
@@ -261,6 +262,7 @@ def create_and_deploy_jumpstart_model(deployment: Deployment, model: Model):
         except Exception:
             console.print_exception()
             quit()
+
     write_config(deployment, model)
     print_success(
         f"{model.model_id} is now up and running at the endpoint [blue]{predictor.endpoint_name}")
