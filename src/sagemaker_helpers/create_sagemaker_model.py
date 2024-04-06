@@ -10,7 +10,7 @@ from sagemaker.predictor import Predictor
 from sagemaker.s3 import S3Uploader
 from src.config import write_config
 from src.schemas.model import Model, ModelSource
-from src.schemas.deployment import Deployment, Destination
+from src.schemas.deployment import Deployment
 from src.session import session, sagemaker_session
 from src.console import console
 from src.utils.aws_utils import construct_s3_uri, is_s3_uri
@@ -39,7 +39,7 @@ def deploy_huggingface_model(deployment: Deployment, model: Model):
     task = get_hf_task(model)
     model.task = task
     env = {
-        'HF_MODEL_ID': model.model_id,
+        'HF_MODEL_ID': model.id,
         'HF_TASK': task,
     }
 
@@ -70,10 +70,9 @@ def deploy_huggingface_model(deployment: Deployment, model: Model):
     )
 
     endpoint_name = get_unique_endpoint_name(
-        model.model_id, deployment.endpoint_name)
+        model.id, deployment.endpoint_name)
 
     deployment.endpoint_name = endpoint_name
-    deployment.destination = Destination.AWS.value
 
     console.log(
         "Deploying model to AWS. [magenta]This may take up to 10 minutes for very large models.[/magenta] See full logs here:")
@@ -84,7 +83,7 @@ def deploy_huggingface_model(deployment: Deployment, model: Model):
         table = Table(show_header=False, header_style="magenta")
         table.add_column("Resource", style="dim")
         table.add_column("Value", style="blue")
-        table.add_row("model", model.model_id)
+        table.add_row("model", model.id)
         table.add_row("EC2 instance type", deployment.instance_type)
         table.add_row("Number of instances", str(
             deployment.instance_count))
@@ -102,7 +101,7 @@ def deploy_huggingface_model(deployment: Deployment, model: Model):
             quit()
 
     print_success(
-        f"{model.model_id} is now up and running at the endpoint [blue]{predictor.endpoint_name}")
+        f"{model.id} is now up and running at the endpoint [blue]{predictor.endpoint_name}")
 
     write_config(deployment, model)
     return predictor
@@ -118,8 +117,8 @@ def deploy_custom_huggingface_model(deployment: Deployment, model: Model):
     if not is_s3_uri(model.location):
         # Local file. Upload to s3 before deploying
         bucket = sagemaker_session.default_bucket()
-        s3_path = construct_s3_uri(bucket, f"models/{model.model_id}")
-        with console.status(f"[bold green]Uploading custom {model.model_id} model to S3 at {s3_path}...") as status:
+        s3_path = construct_s3_uri(bucket, f"models/{model.id}")
+        with console.status(f"[bold green]Uploading custom {model.id} model to S3 at {s3_path}...") as status:
             try:
                 s3_path = S3Uploader.upload(
                     model.location, s3_path)
@@ -127,10 +126,10 @@ def deploy_custom_huggingface_model(deployment: Deployment, model: Model):
                 print_error("[red] Model failed to upload to S3")
 
     endpoint_name = get_unique_endpoint_name(
-        model.model_id, deployment.endpoint_name)
+        model.id, deployment.endpoint_name)
 
     deployment.endpoint_name = endpoint_name
-    deployment.destination = Destination.AWS.value
+    model.task = get_model_and_task(model.id)['task']
 
     console.log(
         "Deploying model to AWS. [magenta]This may take up to 10 minutes for very large models.[/magenta] See full logs here:")
@@ -168,7 +167,7 @@ def deploy_custom_huggingface_model(deployment: Deployment, model: Model):
             quit()
 
     print_success(
-        f"Custom {model.model_id} is now up and running at the endpoint [blue]{predictor.endpoint_name}")
+        f"Custom {model.id} is now up and running at the endpoint [blue]{predictor.endpoint_name}")
 
     write_config(deployment, model)
     return predictor
@@ -226,10 +225,9 @@ def create_sagemaker_model(model_id: str, model_version: str, instance_type, ins
 def create_and_deploy_jumpstart_model(deployment: Deployment, model: Model):
     region_name = session.region_name
     endpoint_name = get_unique_endpoint_name(
-        model.model_id, deployment.endpoint_name)
+        model.id, deployment.endpoint_name)
     deployment.endpoint_name = endpoint_name
-    deployment.destination = Destination.AWS.value
-    model.task = get_model_and_task(model.model_id)['task']
+    model.task = get_model_and_task(model.id)['task']
 
     console.log(
         "Deploying model to AWS. [magenta]This may take up to 10 minutes for very large models.[/magenta] See full logs here:")
@@ -241,14 +239,14 @@ def create_and_deploy_jumpstart_model(deployment: Deployment, model: Model):
         table = Table(show_header=False, header_style="magenta")
         table.add_column("Resource", style="dim")
         table.add_column("Value", style="blue")
-        table.add_row("model", model.model_id)
+        table.add_row("model", model.id)
         table.add_row("EC2 instance type", deployment.instance_type)
         table.add_row("Number of instances", str(
             deployment.instance_count))
         console.print(table)
 
         jumpstart_model = JumpStartModel(
-            model_id=model.model_id, instance_type=deployment.instance_type, role=SAGEMAKER_ROLE)
+            model_id=model.id, instance_type=deployment.instance_type, role=SAGEMAKER_ROLE)
 
         # Attempt to deploy to AWS
         try:
@@ -265,6 +263,6 @@ def create_and_deploy_jumpstart_model(deployment: Deployment, model: Model):
 
     write_config(deployment, model)
     print_success(
-        f"{model.model_id} is now up and running at the endpoint [blue]{predictor.endpoint_name}")
+        f"{model.id} is now up and running at the endpoint [blue]{predictor.endpoint_name}")
 
     return predictor

@@ -10,16 +10,16 @@ from src.utils.model_utils import get_model_and_task, is_sagemaker_model, get_te
 from src.utils.rich_utils import print_error
 from src.schemas.deployment import Deployment
 from src.schemas.model import Model
+from src.schemas.query import Query
 from src.session import sagemaker_session
-from typing import Dict, Tuple
+from typing import Dict, Tuple, Optional
 
 
-def query_endpoint(endpoint_name: str, query: str, configs: Dict[str, Tuple[Deployment, Model]]):
-    config = configs.get(endpoint_name)
+def make_query_request(endpoint_name: str, query: Query, config: Tuple[Deployment, Model]):
     if is_sagemaker_model(endpoint_name, config):
-        query_sagemaker_endpoint(endpoint_name, query, config)
+        return query_sagemaker_endpoint(endpoint_name, query, config)
     else:
-        query_hugging_face_endpoint(endpoint_name, query, config)
+        return query_hugging_face_endpoint(endpoint_name, query, config)
 
 
 def parse_response(query_response):
@@ -29,41 +29,50 @@ def parse_response(query_response):
     return probabilities, labels, predicted_label
 
 
-def query_hugging_face_endpoint(endpoint_name: str, query: str, config: Tuple[Deployment, Model]):
+def query_hugging_face_endpoint(endpoint_name: str, user_query: Query, config: Tuple[Deployment, Model]):
     task = get_model_and_task(endpoint_name, config)['task']
     predictor = HuggingFacePredictor(endpoint_name=endpoint_name,
                                      sagemaker_session=sagemaker_session)
 
+    query = user_query.query
+    context = user_query.context
+
     input = {"inputs": query}
     if task is not None and task == HuggingFaceTask.QuestionAnswering:
-        questions = [{
-            "type": "input", "message": "What context would you like to provide?:", "name": "context"}]
-        answers = prompt(questions)
-        if answers is None:
-            print_error("must provide context for question-answering")
-            return
+        if context is None:
+            questions = [{
+                "type": "input", "message": "What context would you like to provide?:", "name": "context"}]
+            answers = prompt(questions)
+            context = answers.get('context', '')
+
+        if not context:
+            raise Exception("Must provide context for question-answering")
+
         input = {}
         input['context'] = answers['context']
         input['question'] = query
 
     if task is not None and task == HuggingFaceTask.TextGeneration:
-        parameters = get_text_generation_hyperpameters(config)
+        parameters = get_text_generation_hyperpameters(config, user_query)
         input['parameters'] = parameters
 
     if task is not None and task == HuggingFaceTask.ZeroShotClassification:
-        questions = [
-            inquirer.Text('labels',
-                          message="What labels would you like to use? (comma separated values)?",
-                          )
-        ]
-        answers = inquirer.prompt(questions)
-        if answers is None:
-            print_error(
-                "must provide labels for zero shot text classification")
-            return
-        labels = answers['labels'].split(',')
+        if context is None:
+            questions = [
+                inquirer.Text('labels',
+                              message="What labels would you like to use? (comma separated values)?",
+                              )
+            ]
+            answers = inquirer.prompt(questions)
+            context = answers.get('labels', '')
+
+        if not context:
+            raise Exception(
+                "Must provide labels for zero shot text classification")
+
+        labels = context.split(',')
         input = json.dumps({
-            "sequences": "query",
+            "sequences": query,
             "candidate_labels": labels
         })
 
@@ -77,7 +86,7 @@ def query_hugging_face_endpoint(endpoint_name: str, query: str, config: Tuple[De
     return result
 
 
-def query_sagemaker_endpoint(endpoint_name: str, query: str, config: Tuple[Deployment, Model]):
+def query_sagemaker_endpoint(endpoint_name: str, user_query: Query, config: Tuple[Deployment, Model]):
     client = boto3.client('runtime.sagemaker')
     task = get_model_and_task(endpoint_name, config)['task']
 
@@ -102,59 +111,65 @@ Querying this model type inside of Model Manager isn’t yet supported.
 You can query it directly through the API endpoint - see here for documentation on how to do this:
 https://docs.aws.amazon.com/sagemaker/latest/APIReference/API_runtime_InvokeEndpoint.html
                     """)
-        return
+        raise Exception("Unsupported")
+
     # MIME content type varies per deployment
     content_type = "application/x-text"
     accept_type = "application/json;verbose"
 
     # Depending on the task, input needs to be formatted differently.
     # e.g. question-answering needs to have {question: , context: }
+    query = user_query.query
+    context = user_query.context
     input = query.encode("utf-8")
     match task:
         case SagemakerTask.ExtractiveQuestionAnswering:
-            questions = [
-                {
-                    'type': 'input',
-                    'name': 'context',
-                    'message': "What context would you like to provide?",
-                }
-            ]
-            answers = prompt(questions)
-            if answers is None:
-                print_error("must provide context for question-answering")
-                return
-            context = answers['context']
+            if context is None:
+                questions = [
+                    {
+                        'type': 'input',
+                        'name': 'context',
+                        'message': "What context would you like to provide?",
+                    }
+                ]
+                answers = prompt(questions)
+                context = answers.get("context", '')
+
+            if not context:
+                raise Exception("Must provide context for question-answering")
 
             content_type = "application/list-text"
             input = json.dumps([query, context]).encode("utf-8")
 
         case SagemakerTask.SentencePairClassification:
-            questions = [
-                inquirer.Text('context',
-                              message="What sentence would you like to compare against?",
-                              )
-            ]
-            answers = inquirer.prompt(questions)
-            if answers is None:
-                print_error(
-                    "must provide a second sentence for sentence pair classification")
-                return
-            context = answers['context']
+            if context is None:
+                questions = [
+                    inquirer.Text('context',
+                                  message="What sentence would you like to compare against?",
+                                  )
+                ]
+                answers = inquirer.prompt(questions)
+                context = answers.get("context", '')
+            if not context:
+                raise Exception(
+                    "Must provide a second sentence for sentence pair classification")
 
             content_type = "application/list-text"
             input = json.dumps([query, context]).encode("utf-8")
         case SagemakerTask.ZeroShotTextClassification:
-            questions = [
-                inquirer.Text('labels',
-                              message="What labels would you like to use? (comma separated values)?",
-                              )
-            ]
-            answers = inquirer.prompt(questions)
-            if answers is None:
-                print_error(
+            if context is None:
+                questions = [
+                    inquirer.Text('labels',
+                                  message="What labels would you like to use? (comma separated values)?",
+                                  )
+                ]
+                answers = inquirer.prompt(questions)
+                context = answers.get('labels', '')
+
+            if not context:
+                raise Exception(
                     "must provide labels for zero shot text classification")
-                return
-            labels = answers['labels'].split(',')
+            labels = context.split(',')
 
             content_type = "application/json"
             input = json.dumps({
@@ -162,7 +177,7 @@ https://docs.aws.amazon.com/sagemaker/latest/APIReference/API_runtime_InvokeEndp
                 "candidate_labels": labels,
             }).encode("utf-8")
         case SagemakerTask.TextGeneration:
-            parameters = get_text_generation_hyperpameters(config)
+            parameters = get_text_generation_hyperpameters(config, user_query)
             input = json.dumps({
                 "inputs": query,
                 "parameters": parameters,

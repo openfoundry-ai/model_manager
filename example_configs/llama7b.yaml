@@ -8,7 +8,7 @@ deployment: !Deployment
 
 models:
 - !Model
-  model_id: meta-llama/Llama-2-7b-hf
+  id: meta-llama/Llama-2-7b-hf
   source: huggingface
   predict:
     temperature: 0.9

@@ -3,8 +3,10 @@ from difflib import SequenceMatcher
 from dotenv import dotenv_values
 from huggingface_hub import HfApi
 from src.utils.rich_utils import print_error
+from src.sagemaker_helpers import SagemakerTask
 from src.schemas.deployment import Deployment
 from src.schemas.model import Model, ModelSource
+from src.schemas.query import Query
 from src.session import sagemaker_session
 from typing import Dict, Tuple, Optional
 HUGGING_FACE_HUB_TOKEN = dotenv_values(".env").get("HUGGING_FACE_HUB_KEY")
@@ -22,10 +24,13 @@ def get_unique_endpoint_name(model_id: str, endpoint_name: str = None):
         return f"{endpoint_name[:50]}-{dt_string}"
 
 
-def is_sagemaker_model(endpoint_name: str, config: Optional[Tuple[Deployment, Model]]) -> bool:
+def is_sagemaker_model(endpoint_name: str, config: Optional[Tuple[Deployment, Model]] = None) -> bool:
     if config is not None:
         _, model = config
-        return model.source == ModelSource.Sagemaker
+        task = get_sagemaker_model_and_task(model.id)['task']
+
+        # check task for custom sagemaker models
+        return model.source == ModelSource.Sagemaker or task in SagemakerTask.list()
 
     # fallback
     return endpoint_name.find("--") == -1
@@ -36,9 +41,6 @@ def is_custom_model(endpoint_name: str) -> bool:
 
 
 def get_sagemaker_model_and_task(endpoint_or_model_name: str):
-    endpoint_or_model_name = endpoint_or_model_name.removeprefix('custom-')
-    if not is_sagemaker_model(endpoint_or_model_name):
-        return None
     components = endpoint_or_model_name.split('-')
     framework, task = components[:2]
     model_id = '-'.join(components[:-1])
@@ -61,18 +63,19 @@ def get_hugging_face_pipeline_task(model_name: str):
     return task
 
 
-def get_model_and_task(endpoint_name: str, config: Optional[Tuple[Deployment, Model]]) -> Dict[str, str]:
+def get_model_and_task(endpoint_or_model_name: str, config: Optional[Tuple[Deployment, Model]] = None) -> Dict[str, str]:
     if config is not None:
         _, model = config
         return {
-            'model_id': model.model_id,
+            'model_id': model.id,
             'task': model.task
         }
 
-    if (is_sagemaker_model(endpoint_name)):
-        return get_sagemaker_model_and_task(endpoint_name)
+    if (is_sagemaker_model(endpoint_or_model_name)):
+        return get_sagemaker_model_and_task(endpoint_or_model_name)
     else:
-        model_id = get_model_name_from_hugging_face_endpoint(endpoint_name)
+        model_id = get_model_name_from_hugging_face_endpoint(
+            endpoint_or_model_name)
         task = get_hugging_face_pipeline_task(model_id)
         return {
             'model_id': model_id,
@@ -104,7 +107,10 @@ def get_model_name_from_hugging_face_endpoint(endpoint_name: str):
     return max(results_to_diff, key=results_to_diff.get)
 
 
-def get_text_generation_hyperpameters(config: Optional[Tuple[Deployment, Model]]):
+def get_text_generation_hyperpameters(config: Optional[Tuple[Deployment, Model]], query: Query = None):
+    if query.parameters is not None:
+        return query.parameters.model_dump()
+
     if config is not None and config[1].predict is not None:
         return config[1].predict
 

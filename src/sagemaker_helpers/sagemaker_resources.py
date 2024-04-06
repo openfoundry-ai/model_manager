@@ -3,22 +3,48 @@ from functools import lru_cache
 from InquirerPy import inquirer
 from src.console import console
 from src.sagemaker_helpers import EC2Instance
-from typing import List, Tuple
+from src.config import get_config_for_endpoint
+from src.utils.format import format_sagemaker_endpoint, format_python_dict
+from typing import List, Tuple, Dict, Optional
 
 
 def list_sagemaker_endpoints(filter_str: str = None) -> List[str]:
     sagemaker_client = boto3.client('sagemaker')
 
     endpoints = sagemaker_client.list_endpoints()['Endpoints']
-
     if filter_str is not None:
-        endpoints = list(filter(lambda x: filter_str in x, endpoints))
+        endpoints = list(filter(lambda x: filter_str ==
+                         x['EndpointName'], endpoints))
 
     for endpoint in endpoints:
         endpoint_config = sagemaker_client.describe_endpoint_config(
             EndpointConfigName=endpoint['EndpointName'])['ProductionVariants'][0]
         endpoint['InstanceType'] = endpoint_config['InstanceType']
     return endpoints
+
+
+def get_sagemaker_endpoint(endpoint_name: str) -> Optional[Dict[str, Optional[Dict]]]:
+    endpoints = list_sagemaker_endpoints(endpoint_name)
+    if not endpoints:
+        return None
+
+    endpoint = format_sagemaker_endpoint(endpoints[0])
+
+    config = get_config_for_endpoint(endpoint_name)
+    if config is None:
+        return {'deployment': endpoint, 'model': None}
+
+    deployment, model = config
+    deployment = format_python_dict(deployment.model_dump())
+    model = format_python_dict(model.model_dump())
+
+    # Merge the endpoint dict with our config
+    deployment = {**endpoint, **deployment}
+
+    return {
+        'deployment': deployment,
+        'model': model,
+    }
 
 
 @lru_cache

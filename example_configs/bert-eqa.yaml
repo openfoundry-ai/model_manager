@@ -8,7 +8,7 @@ deployment: !Deployment
 models:
 - !Model
   # Base model id that was finetuned
-  model_id: huggingface-eqa-bert-base-cased
+  id: huggingface-eqa-bert-base-cased
   source: custom
 
   # local or S3 path
