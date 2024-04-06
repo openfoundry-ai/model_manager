@@ -2,9 +2,9 @@ import yaml
 from src.yaml import loader, dumper
 from typing import Optional, Union, Dict
 from enum import StrEnum
-from dataclasses import dataclass
 from src.huggingface import HuggingFaceTask
 from src.sagemaker_helpers import SagemakerTask
+from pydantic import BaseModel
 
 
 class ModelSource(StrEnum):
@@ -13,26 +13,21 @@ class ModelSource(StrEnum):
     Custom = "custom"
 
 
-@dataclass
-class Model():
-    model_id: str
+class Model(BaseModel):
+    id: str
     source: ModelSource
     task: Optional[Union[HuggingFaceTask, SagemakerTask]] = None
-    model_version: Optional[str] = None
+    version: Optional[str] = None
     location: Optional[str] = None
     predict: Optional[Dict[str, str]] = None
-
-    def __init__(self, **args):
-        # TODO: Validations
-        self.__dict__.update(args)
 
 
 def model_representer(dumper: yaml.SafeDumper, model: Model) -> yaml.nodes.MappingNode:
     return dumper.represent_mapping("!Model", {
-        "model_id": model.model_id,
-        "source": model.source,
+        "id": model.id,
+        "source": model.source.value,
         "task": model.task,
-        "model_version": model.model_version,
+        "version": model.version,
         "location": model.location,
         "predict": model.predict,
     })

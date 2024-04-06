@@ -8,7 +8,8 @@ deployment: !Deployment
 models:
 - !Model
   location: null
-  model_id: huggingface-tc-bert-base-cased
-  model_version: 2.*
+  predict: null
+  id: huggingface-tc-bert-base-cased
+  version: 2.*
   source: sagemaker
-  task: null
+  task: tc

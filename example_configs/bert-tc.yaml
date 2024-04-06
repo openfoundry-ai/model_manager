@@ -5,5 +5,5 @@ deployment: !Deployment
 
 models:
 - !Model
-  model_id: huggingface-tc-bert-large-cased
+  id: huggingface-tc-bert-large-cased
   source: sagemaker

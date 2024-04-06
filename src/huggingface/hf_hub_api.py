@@ -11,7 +11,7 @@ def get_hf_task(model: Model):
     task = None
     try:
         model_info = hf_api.model_info(
-            model.model_id, token=HUGGING_FACE_HUB_TOKEN)
+            model.id, token=HUGGING_FACE_HUB_TOKEN)
         task = model_info.pipeline_tag
         if model_info.transformers_info is not None and model_info.transformers_info.pipeline_tag is not None:
             task = model_info.transformers_info.pipeline_tag

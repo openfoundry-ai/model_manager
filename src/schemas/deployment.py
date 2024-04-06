@@ -3,6 +3,7 @@ from src.yaml import loader, dumper
 from typing import Optional
 from enum import StrEnum
 from dataclasses import dataclass
+from pydantic import BaseModel
 
 
 class Destination(StrEnum):
@@ -11,8 +12,7 @@ class Destination(StrEnum):
     # GCP = "gcp"
 
 
-@dataclass
-class Deployment:
+class Deployment(BaseModel):
     destination: Destination
     instance_type: str
     endpoint_name: Optional[str] = None
@@ -20,15 +20,10 @@ class Deployment:
     num_gpus: Optional[int] = None
     quantization: Optional[str] = None
 
-    def __init__(self, **args):
-        # TODO: Validations
-
-        self.__dict__.update(args)
-
 
 def deployment_representer(dumper: yaml.SafeDumper, deployment: Deployment) -> yaml.nodes.MappingNode:
     return dumper.represent_mapping("!Deployment", {
-        "destination": deployment.destination,
+        "destination": deployment.destination.value,
         "instance_type": deployment.instance_type,
         "endpoint_name": deployment.endpoint_name,
         "instance_count": deployment.instance_count,

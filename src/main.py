@@ -6,11 +6,12 @@ from src.sagemaker_helpers import EC2Instance
 from src.sagemaker_helpers.create_sagemaker_model import deploy_model
 from src.sagemaker_helpers.delete_sagemaker_model import delete_sagemaker_model
 from src.sagemaker_helpers.sagemaker_resources import list_sagemaker_endpoints, select_instance, list_service_quotas_async
-from src.sagemaker_helpers.query_sagemaker_endpoint import query_endpoint
+from src.sagemaker_helpers.query_sagemaker_endpoint import make_query_request
 from src.sagemaker_helpers.search_sagemaker_jumpstart_models import search_sagemaker_jumpstart_model
 from src.utils.rich_utils import print_error, print_success
-from src.schemas.deployment import Deployment
+from src.schemas.deployment import Deployment, Destination
 from src.schemas.model import Model, ModelSource
+from src.schemas.query import Query
 from src.config import get_configs
 from enum import StrEnum
 from rich import print
@@ -105,8 +106,9 @@ def main(args, loglevel):
                     continue
 
                 endpoint = answers['endpoint']
-                query = answers['query']
-                query_endpoint(endpoint, query, configs)
+                query = Query(query=answers['query'])
+                config = configs.get(endpoint)
+                make_query_request(endpoint, query, config)
             case Actions.EXIT:
                 quit()
 
@@ -159,13 +161,14 @@ def build_and_deploy_model(instances, instance_thread):
             instance_type = select_instance(instances)
 
             model = Model(
-                model_id=model_id,
+                id=model_id,
                 model_version=model_version,
-                source=ModelSource.Sagemaker.value
+                source=ModelSource.Sagemaker
             )
 
             deployment = Deployment(
                 instance_type=instance_type,
+                destination=Destination.AWS,
                 num_gpus=4 if instance_type == EC2Instance.LARGE else 1
             )
 
@@ -186,12 +189,13 @@ def build_and_deploy_model(instances, instance_thread):
             instance_type = select_instance(instances)
 
             model = Model(
-                model_id=model_id,
-                source=ModelSource.HuggingFace.value
+                id=model_id,
+                source=ModelSource.HuggingFace
             )
 
             deployment = Deployment(
-                instance_type=instance_type
+                instance_type=instance_type,
+                destination=Destination.AWS,
             )
 
             predictor = deploy_model(deployment=deployment, model=model)
@@ -217,12 +221,13 @@ def build_and_deploy_model(instances, instance_thread):
             instance_type = select_instance(instances)
 
             model = Model(
-                model_id=base_model,
-                source=ModelSource.Custom.value,
+                id=base_model,
+                source=ModelSource.Custom,
                 location=local_path
             )
 
             deployment = Deployment(
-                instance_type=instance_type
+                instance_type=instance_type,
+                destination=Destination.AWS
             )
             deploy_model(deployment=deployment, model=model)

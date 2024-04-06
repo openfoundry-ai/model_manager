@@ -43,3 +43,7 @@ class SagemakerTask(StrEnum):
     Txt2img = "txt2img"
     Upscaling = "upscaling"
     ZeroShotTextClassification = "zstc"
+
+    @staticmethod
+    def list():
+        return list(map(lambda c: c.value, SagemakerTask))
