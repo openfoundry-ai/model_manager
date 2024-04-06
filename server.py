@@ -7,11 +7,6 @@ import uvicorn
 app = FastAPI()
 
 
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
-
-
 @app.get("/endpoint/{endpoint_name}")
 def get_endpoint(endpoint_name: str):
     return get_sagemaker_endpoint(endpoint_name)
