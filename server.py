@@ -1,6 +1,6 @@
 from fastapi import FastAPI
-from src.sagemaker_helpers.sagemaker_resources import get_sagemaker_endpoint
-from src.sagemaker_helpers.query_sagemaker_endpoint import make_query_request
+from src.sagemaker.resources import get_sagemaker_endpoint
+from src.sagemaker.query_endpoint import make_query_request
 from src.schemas.query import Query
 from src.config import get_config_for_endpoint
 import uvicorn

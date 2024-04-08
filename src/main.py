@@ -2,12 +2,12 @@ import inquirer
 import logging
 import threading
 from InquirerPy import prompt
-from src.sagemaker_helpers import EC2Instance
-from src.sagemaker_helpers.create_sagemaker_model import deploy_model
-from src.sagemaker_helpers.delete_sagemaker_model import delete_sagemaker_model
-from src.sagemaker_helpers.sagemaker_resources import list_sagemaker_endpoints, select_instance, list_service_quotas_async
-from src.sagemaker_helpers.query_sagemaker_endpoint import make_query_request
-from src.sagemaker_helpers.search_sagemaker_jumpstart_models import search_sagemaker_jumpstart_model
+from src.sagemaker import EC2Instance
+from src.sagemaker.create_model import deploy_model
+from src.sagemaker.delete_model import delete_sagemaker_model
+from src.sagemaker.resources import list_sagemaker_endpoints, select_instance, list_service_quotas_async
+from src.sagemaker.query_endpoint import make_query_request
+from src.sagemaker.search_jumpstart_models import search_sagemaker_jumpstart_model
 from src.utils.rich_utils import print_error, print_success
 from src.schemas.deployment import Deployment, Destination
 from src.schemas.model import Model, ModelSource

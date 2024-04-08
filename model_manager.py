@@ -5,7 +5,7 @@ import yaml
 logging.getLogger("sagemaker.config").setLevel(logging.WARNING)
 logging.getLogger("botocore.credentials").setLevel(logging.WARNING)
 import os
-from src.sagemaker_helpers.create_sagemaker_model import deploy_huggingface_model, deploy_model
+from src.sagemaker.create_model import deploy_huggingface_model, deploy_model
 from src.schemas.deployment import Deployment
 from src.schemas.model import Model
 
