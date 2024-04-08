@@ -3,7 +3,7 @@ from difflib import SequenceMatcher
 from dotenv import dotenv_values
 from huggingface_hub import HfApi
 from src.utils.rich_utils import print_error
-from src.sagemaker_helpers import SagemakerTask
+from src.sagemaker import SagemakerTask
 from src.schemas.deployment import Deployment
 from src.schemas.model import Model, ModelSource
 from src.schemas.query import Query

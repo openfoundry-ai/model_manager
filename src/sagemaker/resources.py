@@ -2,7 +2,7 @@ import boto3
 from functools import lru_cache
 from InquirerPy import inquirer
 from src.console import console
-from src.sagemaker_helpers import EC2Instance
+from src.sagemaker import EC2Instance
 from src.config import get_config_for_endpoint
 from src.utils.format import format_sagemaker_endpoint, format_python_dict
 from typing import List, Tuple, Dict, Optional
