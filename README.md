@@ -128,11 +128,18 @@ Now you’re ready to start shipping models onto your cloud!
 
 ### Deploying models
 
-There are two repositories from where you can deploy models: Hugging Face or SageMaker. Use whichever works for you! If you're deploying with Hugging Face, copy/paste the full model name from Hugging Face. For example, `google-bert/bert-base-uncased`. Note that you’ll need larger, more expensive instance types in order to run bigger models. It takes anywhere from 2 minutes (for smaller models) to 10+ minutes (for large models) to spin up the instance with your model.
+There are three ways from where you can deploy models: Hugging Face, SageMaker, or your own custom model. Use whichever works for you! If you're deploying with Hugging Face, copy/paste the full model name from Hugging Face. For example, `google-bert/bert-base-uncased`. Note that you’ll need larger, more expensive instance types in order to run bigger models. It takes anywhere from 2 minutes (for smaller models) to 10+ minutes (for large models) to spin up the instance with your model. If you are deploying a Sagemaker model, select a framework and search from a model. If you a deploying a custom model, provide either a valid S3 path or a local path (and the tool will automatically upload it for you). Once deployed, we will generate a YAML file with the deployment and model under `/configs`
+
+#### Deploy using a yaml file
+For future deploys, we recommend deploying through a yaml file for reproducability and IAC. From the cli, you can deploy a model without going through all the menus. You can even integrate us with your Github Actions to deploy on PR merge. Deploy via YAML files simply by passing the `--config` option with local path like so:
+```
+python model_manager.py --config ./example_configs/llama7b.yaml
+```
+
 <br>
 <br>
 
-If you’re using the ml.m5.xlarge instance type, here are some small Hugging Face models that work great:
+If you’re using the `ml.m5.xlarge` instance type, here are some small Hugging Face models that work great:
 <br>
 <br>
 
@@ -167,7 +174,29 @@ If you’re using the ml.m5.xlarge instance type, here are some small Hugging Fa
 <br>
 
 ### Querying models
-There are two ways to query a model you’ve deployed: you can query it using the Model Manager script, or you can call it directly from your code using SageMaker’s API.
+There are three ways to query a model you’ve deployed: you can query it using the Model Manager script, spin up a FastAPI server, or call it directly from your code using SageMaker’s API.
+
+To spin up a FastAPI server, run
+```
+uvicorn server:app --reload
+```
+This will create a server running at `0.0.0.0` on port 8000 which you can query against from your app. There are 2 endpoints:
+1. `GET /endpoint/{endpoint_name}`: Get information about a deployed endpoint
+2. `POST /endpoint/{endpoint_name}/query`: Query a model for inference. The request expects a JSON body with only the `query` key being required. `context` is required for some types of models (such as question-answering). `parameters` can be passed for text-generation/LLM models to further control the output of the model.
+```
+{
+  "query": "string",
+  "context": "string",
+  "parameters": {
+    "max_length": 0,
+    "max_new_tokens": 0,
+    "repetition_penalty": 0,
+    "temperature": 0,
+    "top_k": 0,
+    "top_p": 0
+  }
+}
+```
 
 Querying within Model Manager currently works for text-based models. Image generation, multi-modal, etc. models are not yet supported.
 
@@ -188,8 +217,6 @@ Any model endpoints you spin up will run continuously unless you deactivate them
 ## What we're working on next
 - [ ]  More robust error handling for various edge cases
 - [ ]  Verbose logging
-- [ ]  Support for deploying custom models
-- [ ]  Single-line-of-code SageMaker onboarding
 - [ ]  Enabling / disabling autoscaling
 - [ ]  Deployment to Azure and GCP
 
@@ -202,7 +229,6 @@ Any model endpoints you spin up will run continuously unless you deactivate them
 ## Known issues
 - [ ]  Querying within Model Manager currently only works with text-based model - doesn’t work with multimodal, image generation, etc.
 - [ ]  Model versions are static.
-- [ ]  Querying endpoints with different expected formats
 - [ ]  Deleting a model is not instant, it may show up briefly after it was queued for deletion
 - [ ]  Deploying the same model within the same minute will break
 
