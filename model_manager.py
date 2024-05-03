@@ -6,6 +6,7 @@ logging.getLogger("sagemaker.config").setLevel(logging.WARNING)
 logging.getLogger("botocore.credentials").setLevel(logging.WARNING)
 import os
 from src.sagemaker.create_model import deploy_huggingface_model, deploy_model
+from src.sagemaker.fine_tune_model import fine_tune_model
 from src.schemas.deployment import Deployment
 from src.schemas.model import Model
 
@@ -30,8 +31,13 @@ if __name__ == '__main__':
         type=str
     )
     parser.add_argument(
-        "--config",
-        help="path to YAML configuration file",
+        "--deploy",
+        help="path to YAML deployment configuration file",
+        type=str
+    )
+    parser.add_argument(
+        "--train",
+        help="path to YAML training configuration file",
         type=str
     )
     parser.add_argument(
@@ -52,17 +58,32 @@ if __name__ == '__main__':
         predictor = deploy_huggingface_model(args.hf, instance_type)
         quit()
 
-    if args.config is not None:
+    if args.deploy is not None:
         try:
             deployment = None
             model = None
-            with open(args.config) as config:
+            with open(args.deploy) as config:
                 configuration = yaml.safe_load(config)
                 deployment = configuration['deployment']
 
                 # TODO: Support multi-model endpoints
                 model = configuration['models'][0]
             deploy_model(deployment, model)
+        except:
+            traceback.print_exc()
+            print("File not found")
+
+        quit()
+
+    if args.train is not None:
+        try:
+            train = None
+            model = None
+            with open(args.train) as config:
+                configuration = yaml.safe_load(config)
+                training = configuration['training']
+                model = configuration['models'][0]
+            fine_tune_model(training, model)
         except:
             traceback.print_exc()
             print("File not found")

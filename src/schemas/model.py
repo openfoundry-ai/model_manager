@@ -34,7 +34,6 @@ def model_representer(dumper: yaml.SafeDumper, model: Model) -> yaml.nodes.Mappi
 
 
 def model_constructor(loader: yaml.SafeLoader, node: yaml.nodes.MappingNode) -> Model:
-    """Construct an employee."""
     return Model(**loader.construct_mapping(node))
 
 

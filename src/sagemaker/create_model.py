@@ -5,6 +5,7 @@ from sagemaker import image_uris, model_uris, script_uris
 from sagemaker.huggingface import get_huggingface_llm_image_uri
 from sagemaker.huggingface.model import HuggingFaceModel
 from sagemaker.jumpstart.model import JumpStartModel
+from sagemaker.jumpstart.estimator import JumpStartEstimator
 from sagemaker.model import Model
 from sagemaker.predictor import Predictor
 from sagemaker.s3 import S3Uploader
@@ -171,55 +172,6 @@ def deploy_custom_huggingface_model(deployment: Deployment, model: Model):
 
     write_config(deployment, model)
     return predictor
-
-
-def create_sagemaker_model(model_id: str, model_version: str, instance_type, instance_count, is_train: bool = False):
-    scope = "training" if is_train else "inference"
-    entry_point = "train.py" if is_train else "inference.py"
-
-    # Retrieve the URIs of the JumpStart resources
-    console.log("fetching model metadata")
-    base_model_uri = model_uris.retrieve(
-        model_id=model_id, model_version=model_version, model_scope=scope, sagemaker_session=sagemaker_session
-    )
-    script_uri = script_uris.retrieve(
-        model_id=model_id, model_version=model_version, script_scope=scope, sagemaker_session=sagemaker_session
-    )
-    image_uri = image_uris.retrieve(
-        region=None,
-        framework=None,
-        image_scope=scope,
-        model_id=model_id,
-        model_version=model_version,
-        instance_type=instance_type,
-        sagemaker_session=sagemaker_session
-    )
-
-    table = Table(show_header=False, header_style="magenta")
-    table.add_column("Resource", style="dim")
-    table.add_column("Value", style="blue")
-    table.add_row("model", model_id)
-    table.add_row("model_version", model_version)
-    table.add_row("EC2 instance type", instance_type)
-    table.add_row("Number of instances", str(instance_count))
-    table.add_row("base_model_uri", base_model_uri)
-    table.add_row("script_uri", script_uri)
-    table.add_row("image_uri", image_uri)
-    console.print(table)
-
-    # Create the SageMaker model instance
-    model = JumpStartModel(
-        image_uri=image_uri,
-        model_data=base_model_uri,
-        source_dir=script_uri,
-        entry_point=entry_point,
-        role=SAGEMAKER_ROLE,
-        predictor_cls=Predictor,
-        enable_network_isolation=True,
-        sagemaker_session=sagemaker_session
-    )
-
-    return model
 
 
 def create_and_deploy_jumpstart_model(deployment: Deployment, model: Model):
