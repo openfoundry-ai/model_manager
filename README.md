@@ -131,9 +131,9 @@ Now you’re ready to start shipping models onto your cloud!
 There are three ways from where you can deploy models: Hugging Face, SageMaker, or your own custom model. Use whichever works for you! If you're deploying with Hugging Face, copy/paste the full model name from Hugging Face. For example, `google-bert/bert-base-uncased`. Note that you’ll need larger, more expensive instance types in order to run bigger models. It takes anywhere from 2 minutes (for smaller models) to 10+ minutes (for large models) to spin up the instance with your model. If you are deploying a Sagemaker model, select a framework and search from a model. If you a deploying a custom model, provide either a valid S3 path or a local path (and the tool will automatically upload it for you). Once deployed, we will generate a YAML file with the deployment and model under `/configs`
 
 #### Deploy using a yaml file
-For future deploys, we recommend deploying through a yaml file for reproducability and IAC. From the cli, you can deploy a model without going through all the menus. You can even integrate us with your Github Actions to deploy on PR merge. Deploy via YAML files simply by passing the `--config` option with local path like so:
+For future deploys, we recommend deploying through a yaml file for reproducability and IAC. From the cli, you can deploy a model without going through all the menus. You can even integrate us with your Github Actions to deploy on PR merge. Deploy via YAML files simply by passing the `--deploy` option with local path like so:
 ```
-python model_manager.py --config ./example_configs/llama7b.yaml
+python model_manager.py --deploy ./example_configs/llama7b.yaml
 ```
 
 <br>
