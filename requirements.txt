@@ -63,7 +63,7 @@ rpds-py==0.18.0
 runs==1.2.2
 s3transfer==0.10.1
 safetensors==0.4.3
-sagemaker==2.213.0
+sagemaker==2.218.0
 schema==0.7.5
 setuptools==69.5.1
 six==1.16.0

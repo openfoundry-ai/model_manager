@@ -203,3 +203,4 @@ cython_debug/
 
 models/
 configs/
+.pdm-python
