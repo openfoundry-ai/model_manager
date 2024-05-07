@@ -2,7 +2,6 @@ import yaml
 from src.yaml import loader, dumper
 from typing import Optional
 from enum import StrEnum
-from dataclasses import dataclass
 from pydantic import BaseModel
 
 
