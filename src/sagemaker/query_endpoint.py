@@ -3,6 +3,7 @@ import json
 import inquirer
 from InquirerPy import prompt
 from sagemaker.huggingface.model import HuggingFacePredictor
+from src.config import ModelDeployment
 from src.console import console
 from src.sagemaker import SagemakerTask
 from src.huggingface import HuggingFaceTask

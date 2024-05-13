@@ -34,16 +34,18 @@ def get_sagemaker_endpoint(endpoint_name: str) -> Optional[Dict[str, Optional[Di
     if config is None:
         return {'deployment': endpoint, 'model': None}
 
-    deployment, model = config
-    deployment = format_python_dict(deployment.model_dump())
-    model = format_python_dict(model.model_dump())
+    deployment = format_python_dict(config.deployment.model_dump())
+    formatted_models = []
+    for model in config.models:
+        model = format_python_dict(model.model_dump())
+        formatted_models.append(model)
 
     # Merge the endpoint dict with our config
     deployment = {**endpoint, **deployment}
 
     return {
         'deployment': deployment,
-        'model': model,
+        'models': formatted_models,
     }
 
 
