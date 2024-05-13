@@ -12,7 +12,7 @@ from src.utils.rich_utils import print_error, print_success
 from src.schemas.deployment import Deployment, Destination
 from src.schemas.model import Model, ModelSource
 from src.schemas.query import Query
-from src.config import get_configs
+from src.config import get_config_for_endpoint
 from enum import StrEnum
 from rich import print
 
@@ -41,7 +41,6 @@ def main(args, loglevel):
 
     while True:
         active_endpoints = list_sagemaker_endpoints()
-        configs = get_configs()
         questions = [
             inquirer.List(
                 'action',
@@ -107,7 +106,10 @@ def main(args, loglevel):
 
                 endpoint = answers['endpoint']
                 query = Query(query=answers['query'])
-                config = configs.get(endpoint)
+                config = get_config_for_endpoint(endpoint)
+
+                # support multi-model endpoints
+                config = (config.deployment, config.models[0])
                 make_query_request(endpoint, query, config)
             case Actions.EXIT:
                 quit()

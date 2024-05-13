@@ -1,6 +1,6 @@
 
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List, Literal
 
 
 class QueryParameters(BaseModel):
@@ -16,3 +16,13 @@ class Query(BaseModel):
     query: str
     context: Optional[str] = None
     parameters: Optional[QueryParameters] = None
+
+
+class ChatMessage(BaseModel):
+    role: Literal["user", "assistant", "function", "system"]
+    content: str
+
+
+class ChatCompletion(BaseModel):
+    model: str
+    messages: List[ChatMessage]

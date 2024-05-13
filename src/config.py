@@ -3,12 +3,20 @@ import yaml
 from src.yaml import dumper
 from src.schemas.model import Model
 from src.schemas.deployment import Deployment
-from typing import Dict, Tuple
+from typing import Dict, Tuple, List, NamedTuple, Optional
 
 
-def get_configs() -> Dict[str, Tuple[Deployment, Model]]:
-    configurations = glob.glob("./configs/*.yaml")
-    configs = {}
+class ModelDeployment(NamedTuple):
+    deployment: Deployment
+    models: List[Model]
+
+
+def get_deployment_configs(path: Optional[str] = None) -> List[ModelDeployment]:
+    if path is None:
+        path = "./configs/*.yaml"
+
+    configurations = glob.glob(path)
+    configs = []
 
     for configuration in configurations:
         with open(configuration) as config:
@@ -16,16 +24,35 @@ def get_configs() -> Dict[str, Tuple[Deployment, Model]]:
             if configuration is None:
                 continue
 
+            # Filter out training configs
+            if configuration.get('deployment') is None:
+                continue
+
             deployment = configuration['deployment']
-            # TODO: Support multi-model deployment
-            model = configuration['models'][0]
-            configs[deployment.endpoint_name] = (deployment, model)
+            models = configuration['models']
+            configs.append(ModelDeployment(
+                deployment=deployment, models=models))
 
     return configs
 
 
-def get_config_for_endpoint(endpoint_name: str) -> Tuple[Deployment, Model]:
-    return get_configs().get(endpoint_name)
+def get_endpoints_for_model(model_id: str, path: Optional[str] = None) -> List[ModelDeployment]:
+    configs = get_deployment_configs(path)
+    endpoints = []
+    for config in configs:
+        models = [model.id for model in config.models]
+        if model_id in models:
+            # TODO: Check if endpoint is still active
+            endpoints.append(config)
+    return endpoints
+
+
+def get_config_for_endpoint(endpoint_name: str) -> Optional[ModelDeployment]:
+    configs = get_deployment_configs()
+    for config in configs:
+        if config.deployment.endpoint_name == endpoint_name:
+            return config
+    return None
 
 
 def write_config(deployment: Deployment, model: Model):
