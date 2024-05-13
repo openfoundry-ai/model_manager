@@ -15,7 +15,6 @@ class QueryParameters(BaseModel):
 class Query(BaseModel):
     query: str
     context: Optional[str] = None
-    model_id: Optional[str] = None
     parameters: Optional[QueryParameters] = None
 
 
