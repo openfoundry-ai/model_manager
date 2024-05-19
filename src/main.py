@@ -40,7 +40,7 @@ def main(args, loglevel):
     instance_thread.start()
 
     while True:
-        active_endpoints = list_sagemaker_endpoints()
+        active_endpoints = list_sagemaker_endpoints(onlyActive=True)
         questions = [
             inquirer.List(
                 'action',

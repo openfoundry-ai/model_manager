@@ -8,7 +8,7 @@ from src.utils.format import format_sagemaker_endpoint, format_python_dict
 from typing import List, Tuple, Dict, Optional
 
 
-def list_sagemaker_endpoints(filter_str: str = None) -> List[str]:
+def list_sagemaker_endpoints(filter_str: str = None, onlyActive: bool = False) -> List[str]:
     sagemaker_client = boto3.client('sagemaker')
 
     endpoints = sagemaker_client.list_endpoints()['Endpoints']
@@ -17,11 +17,13 @@ def list_sagemaker_endpoints(filter_str: str = None) -> List[str]:
                          x['EndpointName'], endpoints))
 
     for endpoint in endpoints:
+        # The 'InService' state indicates that the endpoint is ready to accept requests.
+        if onlyActive and ('EndpointStatus' not in endpoint or endpoint['EndpointStatus'] != 'InService'):
+            continue
         endpoint_config = sagemaker_client.describe_endpoint_config(
             EndpointConfigName=endpoint['EndpointName'])['ProductionVariants'][0]
         endpoint['InstanceType'] = endpoint_config['InstanceType']
     return endpoints
-
 
 def get_sagemaker_endpoint(endpoint_name: str) -> Optional[Dict[str, Optional[Dict]]]:
     endpoints = list_sagemaker_endpoints(endpoint_name)
