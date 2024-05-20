@@ -12,7 +12,7 @@ from src.utils.rich_utils import print_error
 from src.schemas.deployment import Deployment
 from src.schemas.model import Model
 from src.schemas.query import Query
-from src.session import sagemaker_session
+from src.session import get_sagemaker_session
 from typing import Dict, Tuple, Optional
 
 
@@ -33,7 +33,7 @@ def parse_response(query_response):
 def query_hugging_face_endpoint(endpoint_name: str, user_query: Query, config: Tuple[Deployment, Model]):
     task = get_model_and_task(endpoint_name, config)['task']
     predictor = HuggingFacePredictor(endpoint_name=endpoint_name,
-                                     sagemaker_session=sagemaker_session)
+                                     sagemaker_session=get_sagemaker_session())
 
     query = user_query.query
     context = user_query.context
