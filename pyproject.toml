@@ -21,6 +21,8 @@ dependencies = [
     "uvicorn>=0.29.0",
     "fastapi>=0.111.0",
     "litellm>=1.37.5",
+    "cryptography>=42.0.7",
+    "supabase>=2.4.5",
 ]
 requires-python = ">=3.12"
 readme = "README.md"

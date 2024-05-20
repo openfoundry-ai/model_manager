@@ -7,7 +7,6 @@ from src.sagemaker import SagemakerTask
 from src.schemas.deployment import Deployment
 from src.schemas.model import Model, ModelSource
 from src.schemas.query import Query
-from src.session import sagemaker_session
 from typing import Dict, Tuple, Optional
 HUGGING_FACE_HUB_TOKEN = dotenv_values(".env").get("HUGGING_FACE_HUB_KEY")
 

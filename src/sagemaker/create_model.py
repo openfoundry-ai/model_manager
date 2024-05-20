@@ -12,7 +12,7 @@ from sagemaker.s3 import S3Uploader
 from src.config import write_config
 from src.schemas.model import Model, ModelSource
 from src.schemas.deployment import Deployment
-from src.session import session, sagemaker_session
+from src.session import get_sagemaker_session, get_boto_session
 from src.console import console
 from src.utils.aws_utils import construct_s3_uri, is_s3_uri
 from src.utils.rich_utils import print_error, print_success
@@ -36,7 +36,7 @@ def deploy_model(deployment: Deployment, model: Model):
 
 
 def deploy_huggingface_model(deployment: Deployment, model: Model):
-    region_name = session.region_name
+    region_name = get_boto_session().region_name
     task = get_hf_task(model)
     model.task = task
     env = {
@@ -67,7 +67,8 @@ def deploy_huggingface_model(deployment: Deployment, model: Model):
         transformers_version="4.37",
         pytorch_version="2.1",
         py_version="py310",
-        image_uri=image_uri
+        image_uri=image_uri,
+        sagemaker_session=get_sagemaker_session(),
     )
 
     endpoint_name = get_unique_endpoint_name(
@@ -109,7 +110,7 @@ def deploy_huggingface_model(deployment: Deployment, model: Model):
 
 
 def deploy_custom_huggingface_model(deployment: Deployment, model: Model):
-    region_name = session.region_name
+    region_name = get_boto_session().region_name
     if model.location is None:
         print_error("Missing model source location.")
         return
@@ -117,7 +118,7 @@ def deploy_custom_huggingface_model(deployment: Deployment, model: Model):
     s3_path = model.location
     if not is_s3_uri(model.location):
         # Local file. Upload to s3 before deploying
-        bucket = sagemaker_session.default_bucket()
+        bucket = get_boto_session().default_bucket()
         s3_path = construct_s3_uri(bucket, f"models/{model.id}")
         with console.status(f"[bold green]Uploading custom {model.id} model to S3 at {s3_path}...") as status:
             try:
@@ -145,6 +146,7 @@ def deploy_custom_huggingface_model(deployment: Deployment, model: Model):
         transformers_version="4.37",
         pytorch_version="2.1",
         py_version="py310",
+        sagemaker_session=get_sagemaker_session()
     )
 
     with console.status("[bold green]Deploying model...") as status:
@@ -175,7 +177,7 @@ def deploy_custom_huggingface_model(deployment: Deployment, model: Model):
 
 
 def create_and_deploy_jumpstart_model(deployment: Deployment, model: Model):
-    region_name = session.region_name
+    region_name = get_boto_session().region_name
     endpoint_name = get_unique_endpoint_name(
         model.id, deployment.endpoint_name)
     deployment.endpoint_name = endpoint_name
@@ -198,7 +200,11 @@ def create_and_deploy_jumpstart_model(deployment: Deployment, model: Model):
         console.print(table)
 
         jumpstart_model = JumpStartModel(
-            model_id=model.id, instance_type=deployment.instance_type, role=SAGEMAKER_ROLE)
+            model_id=model.id,
+            instance_type=deployment.instance_type,
+            role=SAGEMAKER_ROLE,
+            sagemaker_session=get_sagemaker_session()
+        )
 
         # Attempt to deploy to AWS
         try:

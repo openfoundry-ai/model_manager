@@ -9,7 +9,7 @@ from sagemaker.jumpstart.estimator import JumpStartEstimator
 from src.console import console
 from src.schemas.model import Model, ModelSource
 from src.schemas.training import Training
-from src.session import sagemaker_session
+from src.session import get_sagemaker_session
 from src.utils.aws_utils import is_s3_uri
 from src.utils.rich_utils import print_success, print_error
 from transformers import AutoTokenizer
@@ -91,7 +91,7 @@ def fine_tune_model(training: Training, model: Model):
                 output_path=training.output_path,
                 environment={"accept_eula": "true"},
                 role=SAGEMAKER_ROLE,
-                sagemaker_session=sagemaker_session,
+                sagemaker_session=get_sagemaker_session(),
                 hyperparameters=hyperparameters
             )
         case ModelSource.HuggingFace:

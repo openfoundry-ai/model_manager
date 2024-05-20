@@ -1,16 +1,49 @@
+import json
 import uvicorn
 import os
+import yaml
 from dotenv import dotenv_values
-from fastapi import FastAPI
-from src.config import get_config_for_endpoint, get_endpoints_for_model
-from src.sagemaker.resources import get_sagemaker_endpoint
-from src.sagemaker.query_endpoint import make_query_request
-from src.schemas.query import Query, ChatCompletion
-from src.session import session
+from fastapi import FastAPI, Request
+from functools import wraps
 from litellm import completion
+from src.config import get_config_for_endpoint, get_endpoints_for_model
+from src.sagemaker.create_model import deploy_model
+from src.sagemaker.query_endpoint import make_query_request
+from src.sagemaker.resources import get_sagemaker_endpoint
+from src.schemas.query import Query, ChatCompletion
+from src.schemas.secret import Secrets
+from src.supabase.secret import set_secrets, get_secrets
+from src.supabase import supabase_client, supabase_id
+from urllib.parse import unquote
+from pydantic import BaseModel
 
-os.environ["AWS_REGION_NAME"] = session.region_name
 app = FastAPI()
+
+
+class DeploymentConfig(BaseModel):
+    path: str
+
+
+class NotAuthenticatedException(Exception):
+    pass
+
+
+def auth_required(func):
+    @wraps(func)
+    async def wrapper(*args, **kwargs):
+        request = kwargs['request']
+        auth_token = request.cookies.get(f'sb-{supabase_id}-auth-token')
+        if not auth_token:
+            raise NotAuthenticatedException
+
+        payload = json.loads(unquote(auth_token))
+        access_token = payload["access_token"]
+        refresh_token = payload["refresh_token"]
+
+        supabase_client.auth.set_session(access_token, refresh_token)
+        return await func(*args, **kwargs)
+
+    return wrapper
 
 
 class NotDeployedException(Exception):
@@ -20,6 +53,20 @@ class NotDeployedException(Exception):
 @app.get("/endpoint/{endpoint_name}")
 def get_endpoint(endpoint_name: str):
     return get_sagemaker_endpoint(endpoint_name)
+
+
+@app.post("/endpoint/deploy")
+@auth_required
+async def deploy_endpoint(request: Request, deployment_config_path: DeploymentConfig):
+    deployment = None
+    model = None
+    with open(deployment_config_path.path) as config:
+        configuration = yaml.safe_load(config)
+        deployment = configuration['deployment']
+
+        # TODO: Support multi-model endpoints
+        model = configuration['models'][0]
+    deploy_model(deployment, model)
 
 
 @app.post("/endpoint/{endpoint_name}/query")
@@ -54,6 +101,22 @@ def chat_completion(chat_completion: ChatCompletion):
     )
 
     return res
+
+
+@app.post("/secrets/add")
+@auth_required
+async def store_secret(request: Request, secrets: Secrets):
+    user_res = supabase_client.auth.get_user()
+    set_secrets(user_res.user.id, secrets.secrets)
+
+    return
+
+
+@app.get("/secrets/fetch")
+@auth_required
+async def fetch_secret(request: Request):
+    user_res = supabase_client.auth.get_user()
+    return get_secrets(user_res.user.id)
 
 
 if __name__ == "__main__":
